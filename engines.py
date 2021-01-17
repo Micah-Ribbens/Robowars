@@ -16,8 +16,6 @@ class CollisionsFinder:
         return (character_y_coordinate >= platform_y_coordinate and within_platform_length)
     
 
-
-
 class PhysicsEngine:
     gravity_pull = screen_height * .002
     def set_gravity(self, gravity):
@@ -70,6 +68,8 @@ class PhysicsEngine:
 class InteractionsFinder:
     def player_whip(self, player, whip):
         if player.throw_whip:
-            whip_x_coordinate = player.get_x_coordinate() + player.getLength()
-            whip_y_coordinate = player.get_y_coordinate() + (player.getHeight() * .5)
-            whip.render(whip_x_coordinate, whip_y_coordinate)
+            whip.extend_whip()
+        whip_x_coordinate = player.get_x_coordinate() + player.getLength()
+        whip_y_coordinate = player.get_y_coordinate() + (player.getHeight() * .5)
+        whip.render(whip_x_coordinate, whip_y_coordinate)
+            
