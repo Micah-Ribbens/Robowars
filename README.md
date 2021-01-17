@@ -1,5 +1,5 @@
 How to create a request:
-1. git branch -C enter_branch_name
+1. git switch -C enter_branch_name
 2. Make sure you are in the branch name. If not:
 3. git checkout branch_name_from_step_1
 4. git add .
