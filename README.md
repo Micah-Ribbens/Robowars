@@ -6,7 +6,7 @@ How to send code to Github:
 4. git add .
 5. Check to make sure the files are good by (see step 3)
 6. git status
-7. git commit -m "enter description for what you did" (Ex: "Changed player color" not " Changed player color "
+7. git commit -m "enter description for what you did" (Ex: "Changed player color" not " Changed player color ")
 8. git push -u origin branch_name_from_step_1
 
 How to get code from Github:
