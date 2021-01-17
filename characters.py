@@ -23,6 +23,7 @@ class Character:
     jump_height = screen_height * .002
     jump_key_held_down = False
     throw_whip = False
+    space_held_in = False
 
 
     def draw(self):
@@ -88,13 +89,16 @@ class Character:
         if controlls[pygame.K_DOWN] and self.move_down:
             self.y_coordinate += self.movement_down
         
-        if controlls[pygame.K_SPACE]:
+        if controlls[pygame.K_SPACE] and not self.space_held_in:
             self.throw_whip = True
-        
+            self.space_held_in = True
+
         else:
             self.throw_whip = False
-
-
+        
+        if not controlls[pygame.K_SPACE]:
+            self.space_held_in = False
+        
     def jump(self):
         if self.on_platform:
             self.jumped = 0 + self.jump_height
