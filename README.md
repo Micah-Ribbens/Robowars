@@ -11,4 +11,5 @@ How to send code to Github:
 
 How to get code from Github:
 =============================================================================================================
-1. git pull https://github.com/Micah-Ribbens/Robowars
+1. Check to make sure that the code in Github reflects what you did. If yes:
+2. git pull https://github.com/Micah-Ribbens/Robowars
