@@ -1,7 +1,7 @@
 How to send code to Github:
 =============================================================================================================
 1. git switch -C enter_branch_name
-2. Make sure you are in the branch name. If not:
+2. Make sure you are in the branch name. If not (do step 3). If yes (do skip step 3)
 3. git checkout branch_name_from_step_1
 4. git add .
 5. Check to make sure the files are good by (see step 3)
