@@ -56,11 +56,9 @@ class Character:
         controlls = pygame.key.get_pressed()
         if self.jump_key_held_down and self.on_platform:
             self.can_jump = False
-            self.character_color = (0, 250, 0)
 
         if self.on_platform and not self.jump_key_held_down:
             self.can_jump = True
-            self.character_color = (250, 0, 0)
 
         move_right_possible = controlls[pygame.K_RIGHT] and self.can_move_right
         if move_right_possible and self.x_coordinate >= screen_width * .35:
