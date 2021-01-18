@@ -33,6 +33,7 @@ run = True
 platform1 = Platform()
 physics = PhysicsEngine()  
 interactions = InteractionsFinder()
+collisions = CollisionsFinder()
 while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
