@@ -11,7 +11,7 @@ class Character:
     length = screen_width * .05
     height = screen_height * .15
     movement = screen_width * .0005    
-    movement_down = 5
+    movement_down = screen_height * .002
     jumped = 0
     move_down = True
     on_platform = True

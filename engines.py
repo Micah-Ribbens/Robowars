@@ -51,7 +51,8 @@ class CollisionsFinder:
     
 
 class PhysicsEngine:
-    gravity_pull = screen_height * .0001
+    gravity_pull = screen_height * .0005
+    character_died = False
     def set_gravity(self, gravity):
         self.gravity_pull = gravity_pull
     def gravity(self, platform, character):
@@ -97,7 +98,7 @@ class PhysicsEngine:
     
     def within_screen(self, character, platform_y_coordinate):
         if character.get_y_coordinate() >= screen_height:
-            character.reset_character_location(platform_y_coordinate)
+            self.character_died = True
         
     def side_scrolling(self, character, platform):
         if character.move_right:
