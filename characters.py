@@ -14,11 +14,11 @@ class Character:
     movement_down = screen_height * .002
     jumped = 0
     move_down = True
-    on_platform = True
+    on_platform = False
     can_move_left = True
     can_move_right = True
     move_right = False
-    can_jump = True
+    can_jump = False
     is_jumping = False
     jump_height = screen_height * .002
     jump_key_held_down = False
@@ -28,7 +28,7 @@ class Character:
 
     def draw(self):
         pygame.draw.rect(win, (self.character_color), (self.x_coordinate, self.y_coordinate, self.length, self.height))
-    def getHeight(self):
+    def get_height(self):
         return self.height
 
 
@@ -48,7 +48,7 @@ class Character:
         self.y_coordinate = y_coordinate
 
 
-    def getLength(self):
+    def get_length(self):
         return self.length
 
 
@@ -102,11 +102,11 @@ class Character:
             self.jumped = 0 + self.jump_height
             self.is_jumping = True
         
-        if self.jumped < 200 and self.is_jumping:
+        if self.jumped <= screen_height * .4 and self.is_jumping:
             self.y_coordinate -= self.jump_height
             self.jumped += self.jump_height
         
-        if self.jumped > 190:
+        if self.jumped >= screen_height * .4:
             self.is_jumping = False
             self.can_jump = False
 

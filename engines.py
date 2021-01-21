@@ -4,13 +4,15 @@ from important_variables import (
 )
 #Fix the movements yeah!!
 class CollisionsFinder:
+    # Buffer is the character movement down or gravity whichever is greater
+    # Player or Enemy for character
     def on_platform(self, platform, character, buffer):
-        character_y_coordinate = character.get_y_coordinate() + character.getHeight() 
+        character_y_coordinate = character.get_y_coordinate() + character.get_height() 
         platform_y_coordinate = platform.get_y_coordinate()
         platform_x_cordinate = platform.get_x_coordinate()
         character_x_coordinate = character.get_x_coordinate()
 
-        within_platform_length = character_x_coordinate >= platform_x_cordinate - character.getLength() and (
+        within_platform_length = character_x_coordinate >= platform_x_cordinate - character.get_length() and (
             character_x_coordinate <= platform_x_cordinate + platform.length
         )
         
@@ -84,7 +86,7 @@ class PhysicsEngine:
         else:
             character.can_move_left = True
 
-        if character.get_x_coordinate() >= screen_width - character.getLength() or is_not_within_platform_left_boundary:
+        if character.get_x_coordinate() >= screen_width - character.get_length() or is_not_within_platform_left_boundary:
             character.can_move_right = False
         else:
             character.can_move_right = True
@@ -109,7 +111,7 @@ class InteractionsFinder:
     def player_whip(self, player, whip):
         if player.throw_whip:
             whip.extend_whip()
-        whip_x_coordinate = player.get_x_coordinate() + player.getLength()
-        whip_y_coordinate = player.get_y_coordinate() + (player.getHeight() * .5)
+        whip_x_coordinate = player.get_x_coordinate() + player.get_length()
+        whip_y_coordinate = player.get_y_coordinate() + (player.get_height() * .5)
         whip.render(whip_x_coordinate, whip_y_coordinate)
             
