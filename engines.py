@@ -6,6 +6,8 @@ from important_variables import (
 #Buffer is the character movement down or gravity whichever is greater
 #The parameter "character" can be a player or an enemy
 class CollisionsFinder:
+    # Buffer is the character movement down or gravity whichever is greater
+    # Player or Enemy for character
     def on_platform(self, platform, character, buffer):
         character_y_coordinate = character.get_y_coordinate() + character.get_height() 
         platform_y_coordinate = platform.get_y_coordinate()

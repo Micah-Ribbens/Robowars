@@ -103,11 +103,11 @@ class Player:
             self.jumped = 0 + self.jump_height
             self.is_jumping = True
         
-        if self.jumped < 200 and self.is_jumping:
+        if self.jumped <= screen_height * .4 and self.is_jumping:
             self.y_coordinate -= self.jump_height
             self.jumped += self.jump_height
         
-        if self.jumped > 190:
+        if self.jumped >= screen_height * .4:
             self.is_jumping = False
             self.can_jump = False
 

@@ -39,3 +39,13 @@ class Ball:
         self.y_coordinate = y_coordinate
     def update(self):
         pass
+
+def show_enemy_health(self, x_coordinate, y_coordinate, full_health, health_remaining):
+    lost_health = full_health - health_remaining
+    color = (0, 250, 0)
+    health_remaining_length = (health_remaining / full_health) * 100 * (screen_height * .0001)
+    lost_health_length = (lost_health /full_health) * 100 * (screen_height * .0001)
+    pygame.draw.rect(win, (color), (x_coordinate, y_coordinate + screen_height * .02, health_remaining_length, screen_height * .04))
+    color = (250, 0, 0)
+    pygame.draw.rect(win, (color), (x_coordinate + health_remaining_length, y_coordinate + screen_height * .02, lost_health_length, screen_height * .04))
+
