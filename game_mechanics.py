@@ -11,13 +11,16 @@ from engines import (
 from platforms import (
     Platform
 )
-from characters import (
-    Character
+from players import (
+    Player
 )
 from important_variables import (
     screen_width,
     screen_height,
     win
+)
+from enemies import (
+    Simple_Enemy
 )
 # Up is down. Down is up.
 # No spaces between functions in a class
@@ -29,13 +32,13 @@ background = (0, 0, 0)
 
 def run_game():
     run = True
-    doggo = Character()
+    enemy_1 = Simple_Enemy()
+    doggo = Player()
     whip = Whip()
     platform1 = Platform()
     physics = PhysicsEngine()  
     interactions = InteractionsFinder()
     collisions = CollisionsFinder()
-
     controlls = pygame.key.get_pressed()
     game_is_paused = False
     while run:
@@ -60,10 +63,14 @@ def run_game():
         physics.gravity(platform1, doggo)
         physics.boundaries(doggo, platform1)
         physics.movement_possible(platform1, doggo)
-        physics.side_scrolling(doggo, platform1)
+        physics.platform_side_scrolling(doggo, platform1)
+        physics.enemy_side_scrolling(doggo, enemy_1)
         doggo.draw()
+        enemy_1.draw()
+        enemy_1.movement(collisions.on_platform(platform1, enemy_1, 0))
         interactions.player_whip(doggo, whip)
         pygame.display.update()
+        
     
     run_game()
 

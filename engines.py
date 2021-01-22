@@ -3,19 +3,23 @@ from important_variables import (
     screen_width
 )
 #Fix the movements yeah!!
+#Buffer is the character movement down or gravity whichever is greater
+#The parameter "character" can be a player or an enemy
 class CollisionsFinder:
     def on_platform(self, platform, character, buffer):
-        character_y_coordinate = character.get_y_coordinate() + character.getHeight() 
+        character_y_coordinate = character.get_y_coordinate() + character.get_height() 
         platform_y_coordinate = platform.get_y_coordinate()
         platform_x_cordinate = platform.get_x_coordinate()
         character_x_coordinate = character.get_x_coordinate()
 
-        within_platform_length = character_x_coordinate >= platform_x_cordinate - character.getLength() and (
+        within_platform_length = character_x_coordinate >= platform_x_cordinate - character.get_length() and (
             character_x_coordinate <= platform_x_cordinate + platform.length
         )
         
         return (character_y_coordinate >= platform_y_coordinate and  
                 character_y_coordinate <= platform_y_coordinate + buffer and within_platform_length)
+
+
 
  
     def platform_side_boundaries(self, character, platform):
@@ -48,7 +52,9 @@ class CollisionsFinder:
         
         return [is_not_within_platform_left_boundary, is_not_within_platform_right_boundary]
         
-    
+    def enemy_boundaries(self, player, enemy):
+        enemy_side_boundaries = self.player.x_coordinate + self.player.lenght
+
 
 class PhysicsEngine:
     gravity_pull = screen_height * .0005
@@ -84,7 +90,7 @@ class PhysicsEngine:
         else:
             character.can_move_left = True
 
-        if character.get_x_coordinate() >= screen_width - character.getLength() or is_not_within_platform_left_boundary:
+        if character.get_x_coordinate() >= screen_width - character.get_length() or is_not_within_platform_left_boundary:
             character.can_move_right = False
         else:
             character.can_move_right = True
@@ -100,16 +106,20 @@ class PhysicsEngine:
         if character.get_y_coordinate() >= screen_height:
             self.character_died = True
         
-    def side_scrolling(self, character, platform):
-        if character.move_right:
-            platform.move_left(character.movement)
+    def platform_side_scrolling(self, player, platform):
+        if player.move_right:
+            platform.move_left(player.movement)
+    
+    def enemy_side_scrolling(self, player, enemy):
+        if player.move_right:
+            enemy.side_scroll(player.movement)
    
  
 class InteractionsFinder:
     def player_whip(self, player, whip):
         if player.throw_whip:
             whip.extend_whip()
-        whip_x_coordinate = player.get_x_coordinate() + player.getLength()
-        whip_y_coordinate = player.get_y_coordinate() + (player.getHeight() * .5)
+        whip_x_coordinate = player.get_x_coordinate() + player.get_length()
+        whip_y_coordinate = player.get_y_coordinate() + (player.get_height() * .5)
         whip.render(whip_x_coordinate, whip_y_coordinate)
             

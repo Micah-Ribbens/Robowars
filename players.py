@@ -4,8 +4,8 @@ from important_variables import (
     win
 )
 import pygame
-class Character:
-    character_color = (250, 0, 0)
+class Player:
+    player_color = (250, 0, 0)
     x_coordinate = 50
     y_coordinate = 50
     length = screen_width * .05
@@ -14,11 +14,11 @@ class Character:
     movement_down = screen_height * .002
     jumped = 0
     move_down = True
-    on_platform = True
+    on_platform = False
     can_move_left = True
     can_move_right = True
     move_right = False
-    can_jump = True
+    can_jump = False
     is_jumping = False
     jump_height = screen_height * .002
     jump_key_held_down = False
@@ -27,8 +27,9 @@ class Character:
 
 
     def draw(self):
-        pygame.draw.rect(win, (self.character_color), (self.x_coordinate, self.y_coordinate, self.length, self.height))
-    def getHeight(self):
+        pygame.draw.rect(win, (self.player_color), (self.x_coordinate, self.y_coordinate, self.length, self.height))
+    
+    def get_height(self):
         return self.height
 
 
@@ -48,7 +49,7 @@ class Character:
         self.y_coordinate = y_coordinate
 
 
-    def getLength(self):
+    def get_length(self):
         return self.length
 
 
@@ -114,11 +115,11 @@ class Character:
         self.movements()
 
 
-    def set_character_y_coordinates(self, x_coordinate, y_coordinate):
+    def set_player_y_coordinates(self, x_coordinate, y_coordinate):
         self.y_coordinate = y_coordinate
         self.x_coordinate = x_coordinate
 
 
-    def reset_character_location(self, platform_y_coordinate):
+    def reset_player_location(self, platform_y_coordinate):
         self.x_coordinate = 50
         self.y_coordinate = 50

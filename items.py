@@ -24,6 +24,7 @@ class Whip(Item):
     def render(self, character_x_coordinate, character_y_coordinate):
         if self.whip_is_extending and self.length == 10 and self.secs_extended <= 100:
             self.y_coordinate = character_y_coordinate - 100
+            self.x_coordinate = character_x_coordinate
             self.height = 70
             self.secs_extended += 1
             self.draw()
