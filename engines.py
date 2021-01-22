@@ -122,4 +122,4 @@ class InteractionsFinder:
         whip_x_coordinate = player.get_x_coordinate() + player.get_length()
         whip_y_coordinate = player.get_y_coordinate() + (player.get_height() * .5)
         whip.render(whip_x_coordinate, whip_y_coordinate)
-            
+    
