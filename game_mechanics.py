@@ -161,12 +161,12 @@ def run_game():
             interactions.player_whip(doggo, whip)
             physics.enemy_side_scrolling(doggo, enemy_1)
             doggo.draw()
-            enemy_1.draw()
             enemy_1.movement(collisions.on_platform(platform1, enemy_1, 0))
 
         #The draw and update are here so the game doesn't make them disappear, so put draw functions here or both!
         platform1.draw()
         doggo.draw()
+        enemy_1.draw()
         pygame.display.update()
         
     
