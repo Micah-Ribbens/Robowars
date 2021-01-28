@@ -5,12 +5,15 @@ from important_variables import (
 )
 import pygame
 class Player:
+    is_dead = False
+    full_health = 20
+    current_health = 20
     player_color = (250, 0, 0)
     x_coordinate = 50
     y_coordinate = 50
     length = screen_width * .05
     height = screen_height * .15
-    movement = screen_width * .0005    
+    movement = screen_width * .001   
     movement_down = screen_height * .002
     jumped = 0
     move_down = True
@@ -24,6 +27,11 @@ class Player:
     jump_key_held_down = False
     throw_whip = False
     space_held_in = False
+
+    def is_dead(self):
+        if self.current_health == 0:
+            return True
+        return False
 
 
     def draw(self):
@@ -64,10 +72,10 @@ class Player:
         move_right_possible = controlls[pygame.K_RIGHT] and self.can_move_right
         if move_right_possible and self.x_coordinate >= screen_width * .35:
             self.move_right = True
-        
+
         elif move_right_possible:
             self.x_coordinate += self.movement
-        
+
         else:
             self.move_right = False
 
@@ -76,37 +84,36 @@ class Player:
 
         if controlls[pygame.K_UP]:
             self.jump_key_held_down = True
-           
+
         else:
             self.is_jumping = False
             self.jump_key_held_down = False
 
         if self.jump_key_held_down and self.can_jump:
             self.jump()
-        
-        
+
         if controlls[pygame.K_DOWN] and self.move_down:
             self.y_coordinate += self.movement_down
-        
+
         if controlls[pygame.K_SPACE] and not self.space_held_in:
             self.throw_whip = True
             self.space_held_in = True
 
         else:
             self.throw_whip = False
-        
+
         if not controlls[pygame.K_SPACE]:
             self.space_held_in = False
-        
+
     def jump(self):
         if self.on_platform:
             self.jumped = 0 + self.jump_height
             self.is_jumping = True
-        
+
         if self.jumped <= screen_height * .4 and self.is_jumping:
             self.y_coordinate -= self.jump_height
             self.jumped += self.jump_height
-        
+
         if self.jumped >= screen_height * .4:
             self.is_jumping = False
             self.can_jump = False
@@ -119,7 +126,14 @@ class Player:
         self.y_coordinate = y_coordinate
         self.x_coordinate = x_coordinate
 
-
     def reset_player_location(self, platform_y_coordinate):
         self.x_coordinate = 50
         self.y_coordinate = 50
+
+    def collide_left(self):
+        self.x_coordinate -= 75
+        self.current_health -= 10
+
+    def collide_right(self):
+        self.x_coordinate += 75
+        self.current_health -= 10

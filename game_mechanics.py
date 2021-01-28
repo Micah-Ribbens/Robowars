@@ -129,11 +129,11 @@ def run_game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-        
+
         win.fill(background)
         game_stats_shower.render_pause_button(game_is_paused)
-        game_stats_shower.show_character_health(5000000000, 3000000)
-        game_stats_shower.show_enemy_health(90, 90, 100, 0)
+        game_stats_shower.show_character_health(doggo.full_health, doggo.current_health)
+        game_stats_shower.show_enemy_health(50, 100, 100, 10)
         pause_clicked = game_stats_shower.pause_clicked()
         can_pause = not click_is_held_done and pause_clicked
 
@@ -145,20 +145,24 @@ def run_game():
 
         if pause_clicked:
             click_is_held_done = True
-        
+
         else:
             click_is_held_done = False
-            
+
         if not game_is_paused:
 
             if physics.character_died:
+                run = False
+            if doggo.is_dead():
                 run = False
             doggo.movements()
             physics.gravity(platform1, doggo)
             physics.boundaries(doggo, platform1)
             physics.movement_possible(platform1, doggo)
-            physics.side_scrolling(doggo, platform1)
+            physics.platform_side_scrolling(doggo, platform1)
             interactions.player_whip(doggo, whip)
+            interactions.player_enemy_interactions(doggo, enemy_1)
+            interactions.enemy_whip_interactions(enemy_1, whip)
             physics.enemy_side_scrolling(doggo, enemy_1)
             doggo.draw()
             enemy_1.movement(collisions.on_platform(platform1, enemy_1, 0))

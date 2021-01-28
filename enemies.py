@@ -8,11 +8,12 @@ from important_variables import (
 from platforms import Platform
 
 class Enemy:
-    health = 10 
+    full_health = 10 
+    current_health = 10
     color = (0, 0, 250)
     x_coordinate = 80
-    width = 40
-    height = 40 
+    width = screen_width * 0.055
+    height = screen_height * 0.075
     y_coordinate = screen_height - 100 - height
 
     
@@ -29,9 +30,8 @@ class Enemy:
         pygame.draw.rect(win, (self.color), (self.x_coordinate, self.y_coordinate, self.width, self.height))
     
 
-
 class Simple_Enemy(Enemy):
-    movement_speed = 0.2
+    movement_speed = 0.4
     is_moving_left = True
     is_moving_right = False
     damage = 5
@@ -56,9 +56,12 @@ class Simple_Enemy(Enemy):
             self.x_coordinate -= self.movement_speed
 
     def side_scroll(self, change):
-            self.x_coordinate -= change
+        self.x_coordinate -= change
 
+    def knockback_left(self):
+        self.x_coordinate += 75
+        self.current_health -= 10
 
-
-
-
+    def knockback_right(self):
+        self.x_coordinate -= 75
+        self.current_health -= 10
