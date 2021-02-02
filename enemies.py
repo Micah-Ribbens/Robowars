@@ -9,7 +9,8 @@ from important_variables import (
 
 
 class Enemy:
-    health = 10
+    full_health = 10 
+    current_health = 10
     color = (0, 0, 250)
     x_coordinate = 80
     width = 40
@@ -33,7 +34,7 @@ class Enemy:
                          self.y_coordinate, self.width, self.height))
 
 
-class Simple_Enemy(Enemy):
+class SimpleEnemy(Enemy):
     movement_speed = screen_width * .00025
     is_moving_left = True
     is_moving_right = False
@@ -51,17 +52,28 @@ class Simple_Enemy(Enemy):
 
     def movement(self, is_on_platform):
         self._improve_variables()
+
         if self.is_moving_right and not is_on_platform:
             self.is_moving_left = True
             self.is_moving_right = False
+
         elif self.is_moving_left and not is_on_platform:
             self.is_moving_left = False
             self.is_moving_right = True
 
         if self.is_moving_right:
             self.x_coordinate += self.movement_speed
+
         if self.is_moving_left:
             self.x_coordinate -= self.movement_speed
 
     def side_scroll(self, change):
         self.x_coordinate -= change
+    
+    def knockback_left(self):
+        self.x_coordinate += 75
+        self.current_health -= 10
+
+    def knockback_right(self):
+        self.x_coordinate -= 75
+        self.current_health -= 10

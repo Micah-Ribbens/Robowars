@@ -23,10 +23,11 @@ class Item:
 
 class Whip(Item):
     whip_is_extending = False
-    secs_needed = 0.12838726547426365
+    secs_needed_to_extend = 0.12838726547426365
     secs_extended = 0
     whip_speed = screen_width * .0003
     whip_up_length = screen_height * 0.14
+    whip_max_length = screen_width * .3
 
     def _improve_variables(self):
         self.whip_speed = screen_width * (
@@ -38,8 +39,9 @@ class Whip(Item):
     def render(self, character_x_coordinate, character_y_coordinate,
                character_height):
         self._improve_variables()
-        if self.whip_is_extending and self.length == self.base_height and (
-             self.secs_extended <= self.secs_needed):
+
+        if self.whip_is_extending and self.length == (0 or self.base_length) and (
+             self.secs_extended <= self.secs_needed_to_extend):
 
             self.y_coordinate = character_y_coordinate - character_height
             self.x_coordinate = character_x_coordinate
@@ -47,9 +49,9 @@ class Whip(Item):
             self.secs_extended += consistency_keeper.current_speed
             self.draw()
 
-        elif self.length >= self.whip_up_length:
+        elif self.length >= 70:
             self.whip_is_extending = False
-            self.length = self.base_length
+            self.length = 0
             self.height = self.base_height
             self.secs_extended = 0
 
