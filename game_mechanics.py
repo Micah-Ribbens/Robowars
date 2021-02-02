@@ -8,8 +8,6 @@ from items import (
 )
 from engines import (
     PhysicsEngine,
-    CollisionsFinder,
-    InteractionsFinder
 )
 from platforms import (
     Platform
@@ -18,132 +16,39 @@ from players import (
     Player
 )
 from important_variables import (
-    screen_width,
-    screen_height,
     win
 )
-from enemies import (
-    Simple_Enemy
-)
+from HUD import HUD
+from game_renderer import GameRenderer
+from generator import Generator
 # Up is down. Down is up.
 # No spaces between functions in a class
-
-pygame.init()
 
 nameOfGame = "robowars"
 pygame.display.set_caption(f'{nameOfGame}')
 background = (0, 0, 0)
 
 
-# Think of better name
-class GameStatsShower:
-    y_coordinate = 0 + (screen_height * .01)
-    x_coordinate_1 = screen_width - screen_width * .04
-    x_coordinate_2 = x_coordinate_1 + screen_width * .02
-    width = screen_width * .007
-    height = screen_height * .05
-    color = (250, 250, 250)
-    font = pygame.font.Font('freesansbold.ttf', 52)
-
-    def render_pause_button(self, is_paused):
-        if is_paused:
-            self.show_pause_screen()
-
-        else:
-            pass
-
-        pygame.draw.rect(win, (self.color), (self.x_coordinate_1,
-                         self.y_coordinate, self.width, self.height))
-        pygame.draw.rect(win, (self.color), (self.x_coordinate_2,
-                         self.y_coordinate, self.width, self.height))
-
-    def pause_clicked(self):
-        width = (self.x_coordinate_2 - self.x_coordinate_1) + self.width
-        area = pygame.Rect(self.x_coordinate_1, self.y_coordinate, width,
-                           self.height)
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        clicked = pygame.mouse.get_pressed()[0]
-
-        if area.collidepoint(mouse_x, mouse_y) and clicked:
-            return True
-
-        return False
-
-    def show_pause_screen(self):
-        message = "Paused"
-        black = (0, 0, 0)
-        white = (255, 255, 255)
-        text = self.font.render(message, True, white, black)
-        text_rect = text.get_rect()
-        text_rect.center = (screen_width / 2,
-                            screen_height / 2)
-
-        win.blit(text, text_rect)
-
-    def show_character_health(self, full_health, health_remaining):
-        if health_remaining == 0:
-            return
-        lost_health = full_health - health_remaining
-
-        font = pygame.font.Font('freesansbold.ttf', 15)
-        message = f"Health {health_remaining}/{full_health}"
-        black = (0, 0, 0)
-        white = (255, 255, 255)
-        text = font.render(message, True, white, black)
-        text_rect = text.get_rect()
-        text_x_coordinate = 0 + screen_width * .01
-        text_y_coordinate = 0 + screen_height * .04
-        text_rect.left = (text_x_coordinate)
-        text_rect.top = (text_y_coordinate)
-        win.blit(text, text_rect)
-
-        color = (0, 250, 0)
-        health_remaining_length = ((health_remaining / full_health) * 100 *
-                                   (screen_height * .002))
-        lost_health_length = ((lost_health / full_health) * 100 *
-                              (screen_height * .002))
-        pygame.draw.rect(win, (color), (text_x_coordinate,
-                         text_y_coordinate + screen_height * .04,
-                         health_remaining_length, screen_height * .04))
-        color = (250, 0, 0)
-        pygame.draw.rect(win, (color),
-                         (text_x_coordinate + health_remaining_length,
-                         text_y_coordinate + screen_height * .04,
-                         lost_health_length, screen_height * .04))
-
-    def show_enemy_health(self, enemy, full_health, health_remaining):
-        if health_remaining == 0:
-            return
-
-        lost_health = full_health - health_remaining
-        x_coordinate = enemy.x_coordinate
-        y_coordinate = enemy.y_coordinate
-        color = (0, 250, 0)
-        ratio = enemy.width / full_health
-        health_remaining_length = ratio * health_remaining
-        lost_health_length = ratio * lost_health
-        width = screen_height * .01
-        pygame.draw.rect(win, (color), (x_coordinate, y_coordinate - width,
-                         health_remaining_length, width))
-        color = (250, 0, 0)
-        pygame.draw.rect(win, (color), (x_coordinate + health_remaining_length,
-                         y_coordinate - width, lost_health_length, width))
-
-
 def run_game():
-    game_stats_shower = GameStatsShower()
+    hud = HUD()
     run = True
-    enemy_1 = Simple_Enemy()
     doggo = Player()
     whip = Whip()
     platform1 = Platform()
     physics = PhysicsEngine()
-    interactions = InteractionsFinder()
-    collisions = CollisionsFinder()
+    platforms = [platform1]
+    platforms = Generator.generate_platform(platforms, doggo, physics.gravity_pull)
     timesIterated = 0
     click_is_held_done = False
     times = []
     game_is_paused = False
+    enemies = []
+    for x in range(29):
+        platorms = Generator.generate_platform(platforms, doggo, physics.gravity_pull)
+
+    for x in range(29):
+        enemies = Generator.generate_enemy(platforms[x], enemies)
+
     while run:
         timesIterated += 1
         for event in pygame.event.get():
@@ -151,10 +56,21 @@ def run_game():
                 pygame.quit()
         start_time = time()
         win.fill(background)
-        game_stats_shower.render_pause_button(game_is_paused)
-        game_stats_shower.show_character_health(5000, 3000)
-        game_stats_shower.show_enemy_health(enemy_1, 100, 90)
-        pause_clicked = game_stats_shower.pause_clicked()
+        hud.render_pause_button(game_is_paused)
+        hud.show_character_health(5000, 3000)
+
+        delete_indexes = []
+        for x in range(len(enemies)):
+            enemy = enemies[x]
+            if enemy.current_health == 0:
+                delete_indexes.append(x)
+
+            hud.show_enemy_health(enemy, enemy.full_health, enemy.current_health)
+
+        for index in delete_indexes:
+            del enemies[index]
+
+        pause_clicked = hud.pause_clicked()
         can_pause = not click_is_held_done and pause_clicked
 
         if can_pause and game_is_paused:
@@ -171,34 +87,21 @@ def run_game():
 
         if not game_is_paused:
 
-            if physics.character_died:
+            if not physics.is_within_screen(doggo):
                 run = False
 
-            doggo.movements()
-
-            physics.gravity(platform1, doggo)
-            physics.boundaries(doggo, platform1)
-            physics.movement_possible(platform1, doggo)
-            physics.platform_side_scrolling(doggo, platform1)
-
-            interactions.player_whip(doggo, whip)
-
-            physics.enemy_side_scrolling(doggo, enemy_1)
-
-            enemy_1.movement(collisions.on_platform(platform1, enemy_1, 0))
-
+            GameRenderer.render_players_and_platforms(platforms, doggo, whip)
+            GameRenderer.render_enemies(enemies, platforms, doggo)
+            GameRenderer.interactions_runner(doggo, whip, enemies)
         # The draw and update are here so the game doesn't make them disappear,
         # so put draw functions here or both!
-        platform1.draw()
-        doggo.draw()
-        enemy_1.draw()
+        GameRenderer.draw_everything(doggo, enemies, platforms)
         pygame.display.update()
         end_time = time()
         times.append(end_time - start_time)
         consistency_keeper.change_current_speed(end_time - start_time)
-        consistency_keeper.change_new_speed(average(times))
+        consistency_keeper.change_new_speed(end_time - start_time)
 
-    print(average(times))
     run_game()
 
 

@@ -8,15 +8,17 @@ import pygame
 
 
 class Player:
+    full_health = 20
+    current_health = full_health
     player_color = (250, 0, 0)
-    x_coordinate = 50
-    y_coordinate = 50
+    x_coordinate = 100
+    y_coordinate = screen_height - 200
     length = screen_width * .05
     height = screen_height * .15
     movement = screen_width * 0.0004
     movement_down = screen_height * .002
     jumped = 0
-    move_down = True
+    can_move_down = True
     on_platform = False
     can_move_left = True
     can_move_right = True
@@ -24,6 +26,7 @@ class Player:
     can_jump = False
     is_jumping = False
     jump_height = screen_height * .002
+    max_jump_height = screen_height * .4
     jump_key_held_down = False
     throw_whip = False
     space_held_in = False
@@ -59,6 +62,12 @@ class Player:
 
     def get_length(self):
         return self.length
+    
+    def is_dead(self):
+        if self.current_health == 0:
+            return True
+
+        return False
 
     def movements(self):
         self._improve_variables()
@@ -92,7 +101,7 @@ class Player:
         if self.jump_key_held_down and self.can_jump:
             self.jump()
 
-        if controlls[pygame.K_DOWN] and self.move_down:
+        if controlls[pygame.K_DOWN] and self.can_move_down:
             self.y_coordinate += self.movement_down
 
         if controlls[pygame.K_SPACE] and not self.space_held_in:
@@ -110,11 +119,11 @@ class Player:
             self.jumped = 0 + self.jump_height
             self.is_jumping = True
 
-        if self.jumped <= screen_height * .4 and self.is_jumping:
+        if self.jumped <= self.max_jump_height and self.is_jumping:
             self.y_coordinate -= self.jump_height
             self.jumped += self.jump_height
 
-        if self.jumped >= screen_height * .4:
+        if self.jumped >= self.max_jump_height:
             self.is_jumping = False
             self.can_jump = False
 
@@ -128,3 +137,12 @@ class Player:
     def reset_player_location(self, platform_y_coordinate):
         self.x_coordinate = 50
         self.y_coordinate = 50
+
+    def knockback_left(self):
+        self.x_coordinate -= 75
+        self.current_health -= 10
+
+    def knockback_right(self):
+        self.x_coordinate += 75
+        self.current_health -= 10
+
