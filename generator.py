@@ -5,13 +5,14 @@ from important_variables import (
 from platforms import Platform
 from enemies import SimpleEnemy
 import random
+from players import Player
+import cProfile
 
 
 def platform_copy(platform):
     copy = Platform()
     copy.y_coordinate = platform.y_coordinate
     return copy
-
 
 def generate_platform_length():
     return random.randint(screen_width * .1, screen_width * .04)
@@ -23,6 +24,7 @@ def generate_platform_width():
 
 def generate_platform_x_coordinate(jump_seconds, player_movement,
                                    platform):
+
     max_space_apart = jump_seconds * player_movement
     min_space_apart = max_space_apart / 2
     platform_end = platform.x_coordinate + platform.length
@@ -32,6 +34,12 @@ def generate_platform_x_coordinate(jump_seconds, player_movement,
 
     return random.randrange(min_x_coordinate,
                             max_x_coordinate) / 1000
+
+
+def generate_platform_y_coordinate(player, platform):
+    max_height = screen_height - platform.height
+    min_height = player.height * 1.5
+    return random.randrange(min_height, max_height)
 
 
 def jump_seconds(player, gravity):
@@ -83,8 +91,9 @@ def needed_y_coordinate(x_coordinate, player, last_platform, gravity):
 
         if distance_traveled >= distance_needed and is_falling:
             # So the player does not have to have a perfect jump to get to the platform
-            min_player_buffer = player.movement * 300
-            max_player_buffer = player.movement * 500
+            min_player_buffer = player.movement * 200
+            max_player_buffer = player.movement * 400
+            
             player_buffer = random.randint(min_player_buffer, max_player_buffer)
             return last_platform.y_coordinate - change_in_y + player_buffer
 
@@ -116,3 +125,4 @@ class Generator:
         enemies.append(new_enemy)
 
         return enemies
+
