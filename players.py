@@ -6,7 +6,6 @@ from important_variables import (
 )
 import pygame
 
-
 class Player:
     full_health = 20
     current_health = full_health
@@ -71,6 +70,7 @@ class Player:
 
     def movements(self):
         self._improve_variables()
+        # print(self.movement)
         controlls = pygame.key.get_pressed()
         if self.jump_key_held_down and self.on_platform:
             self.can_jump = False

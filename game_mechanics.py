@@ -1,5 +1,7 @@
-from time import time
+from enemies import Enemy, SimpleEnemy
+import time
 import pygame
+import time
 from important_variables import (
     consistency_keeper
 )
@@ -21,6 +23,7 @@ from important_variables import (
 from HUD import HUD
 from game_renderer import GameRenderer
 from generator import Generator
+from score_keeper import ScoreKeeper
 # Up is down. Down is up.
 # No spaces between functions in a class
 
@@ -40,13 +43,13 @@ def run_game():
     platforms = Generator.generate_platform(platforms, doggo, physics.gravity_pull)
     timesIterated = 0
     click_is_held_done = False
-    times = []
     game_is_paused = False
     enemies = []
+    score_keeper = ScoreKeeper(doggo)
     for x in range(29):
         platorms = Generator.generate_platform(platforms, doggo, physics.gravity_pull)
 
-    for x in range(29):
+    for x in range(28):
         enemies = Generator.generate_enemy(platforms[x], enemies)
 
     while run:
@@ -54,10 +57,14 @@ def run_game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-        start_time = time()
+        start_time = time.time()
         win.fill(background)
         hud.render_pause_button(game_is_paused)
-        hud.show_character_health(5000, 3000)
+
+        hud.show_character_health(doggo.full_health, doggo.current_health)
+
+        if doggo.is_dead():
+            run = False
 
         delete_indexes = []
         for x in range(len(enemies)):
@@ -95,19 +102,13 @@ def run_game():
             GameRenderer.interactions_runner(doggo, whip, enemies)
         # The draw and update are here so the game doesn't make them disappear,
         # so put draw functions here or both!
+        score_keeper.give_score(doggo)
         GameRenderer.draw_everything(doggo, enemies, platforms)
         pygame.display.update()
-        end_time = time()
-        times.append(end_time - start_time)
+        end_time = time.time()
         consistency_keeper.change_current_speed(end_time - start_time)
         consistency_keeper.change_new_speed(end_time - start_time)
 
     run_game()
 
 
-def average(numbers):
-    total = 0
-    for number in numbers:
-        total += number
-
-    return total / len(numbers)

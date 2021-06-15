@@ -8,11 +8,7 @@ from engines import (
 class GameRenderer:
     def player_platform_runner(player, platform):
         physics_engine = PhysicsEngine()
-        # physics_engine.gravity(platform, player)
-        # physics_engine.boundaries(player, platform)
-        # physics_engine.movement_possible(platform, player)
         physics_engine.platform_side_scrolling(player, platform)
-        # physics_engine.enemy_side_scrolling(player, enemy)
 
     def _render_enemy(enemy, platform, player):
         collisions_finder = CollisionsFinder()

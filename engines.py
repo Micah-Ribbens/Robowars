@@ -4,8 +4,6 @@ from important_variables import (
     consistency_keeper
 )
 
-
-# Fix the movements yeah!!
 # Buffer is the character movement down or gravity whichever is greater
 # The parameter "character" can be a player or an enemy
 class CollisionsFinder:

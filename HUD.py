@@ -1,3 +1,4 @@
+import cProfile
 from important_variables import (
     screen_width,
     screen_height,
@@ -14,7 +15,7 @@ class HUD:
     width = screen_width * .007
     height = screen_height * .05
     color = (250, 250, 250)
-    font = pygame.font.Font('freesansbold.ttf', 52)
+    font = pygame.font.Font('freesansbold.ttf', 15)
 
     def render_pause_button(self, is_paused):
         if is_paused:
@@ -41,10 +42,11 @@ class HUD:
         return False
 
     def show_pause_screen(self):
+        font = pygame.font.Font('freesansbold.ttf', 45)
         message = "Paused"
         black = (0, 0, 0)
         white = (255, 255, 255)
-        text = self.font.render(message, True, white, black)
+        text = font.render(message, True, white, black)
         text_rect = text.get_rect()
         text_rect.center = (screen_width / 2,
                             screen_height / 2)
@@ -56,11 +58,10 @@ class HUD:
             return
         lost_health = full_health - health_remaining
 
-        font = pygame.font.Font('freesansbold.ttf', 15)
         message = f"Health {health_remaining}/{full_health}"
         black = (0, 0, 0)
         white = (255, 255, 255)
-        text = font.render(message, True, white, black)
+        text = self.font.render(message, True, white, black)
         text_rect = text.get_rect()
         text_x_coordinate = 0 + screen_width * .01
         text_y_coordinate = 0 + screen_height * .04
@@ -96,6 +97,22 @@ class HUD:
         width = screen_height * .01
         pygame.draw.rect(win, (color), (x_coordinate, y_coordinate - width,
                          health_remaining_length, width))
+
         color = (250, 0, 0)
         pygame.draw.rect(win, (color), (x_coordinate + health_remaining_length,
                          y_coordinate - width, lost_health_length, width))
+    
+    def show_score(self, distance_traveled):
+        message = f"Distance: {distance_traveled}"
+
+        black = (0, 0, 0)
+        white = (255, 255, 255)
+        text = self.font.render(message, True, white, black)
+        text_rect = text.get_rect()
+        text_x_coordinate = 0 + screen_width * .008
+        text_y_coordinate = 0 + screen_height * .15
+        text_rect.left = (text_x_coordinate)
+        text_rect.top = (text_y_coordinate)
+        win.blit(text, text_rect)
+
+     
