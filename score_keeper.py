@@ -32,4 +32,4 @@ class ScoreKeeper:
         if self.current_distance > self.distance_traveled:
             self.distance_traveled = self.current_distance
 
-        hud.show_score(self.distance_traveled // 10)
+        HUD.show_score(self.distance_traveled // 10)
