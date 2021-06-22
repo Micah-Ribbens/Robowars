@@ -5,14 +5,17 @@ from important_variables import (
     consistency_keeper
 )
 import pygame
+from time import time
+import math
 
 class Player:
+    is_facing_right = True
     full_health = 20
     current_health = full_health
     player_color = (250, 0, 0)
     x_coordinate = 100
     y_coordinate = screen_height - 200
-    length = screen_width * .05
+    width = screen_width * .05
     height = screen_height * .15
     movement = screen_width * 0.0004
     movement_down = screen_height * .002
@@ -22,13 +25,16 @@ class Player:
     can_move_left = True
     can_move_right = True
     move_right = False
-    can_jump = False
+    can_jump = True
     is_jumping = False
     jump_height = screen_height * .002
     max_jump_height = screen_height * .4
     jump_key_held_down = False
     throw_whip = False
     space_held_in = False
+    # So player hangs a bit in air when reaches max jump height
+    stay_up_in_air = False
+    stationary_air_time = 0
 
     def _improve_variables(self):
         self.movement = screen_width * (
@@ -42,26 +48,8 @@ class Player:
 
     def draw(self):
         pygame.draw.rect(win, (self.player_color), (self.x_coordinate,
-                         self.y_coordinate, self.length, self.height))
+                         self.y_coordinate, self.width, self.height))
 
-    def get_height(self):
-        return self.height
-
-    def get_x_coordinate(self):
-        return self.x_coordinate
-
-    def get_y_coordinate(self):
-        return self.y_coordinate
-
-    def change_x_coordinate(self, x_coordinate):
-        self.x_coordinate = x_coordinate
-
-    def change_y_coordinate(self, y_coordinate):
-        self.y_coordinate = y_coordinate
-
-    def get_length(self):
-        return self.length
-    
     def is_dead(self):
         if self.current_health == 0:
             return True
@@ -69,17 +57,20 @@ class Player:
         return False
 
     def movements(self):
-        self._improve_variables()
-        # print(self.movement)
         controlls = pygame.key.get_pressed()
+        self._improve_variables()
         if self.jump_key_held_down and self.on_platform:
             self.can_jump = False
 
-        if self.on_platform and not self.jump_key_held_down:
+        elif self.on_platform:
             self.can_jump = True
 
         move_right_possible = controlls[pygame.K_RIGHT] and self.can_move_right
-        if move_right_possible and self.x_coordinate >= screen_width * .35:
+
+        if move_right_possible:
+            self.is_facing_right = True
+
+        if move_right_possible and self.x_coordinate >= screen_width * .2:
             self.move_right = True
 
         elif move_right_possible:
@@ -90,16 +81,22 @@ class Player:
 
         if controlls[pygame.K_LEFT] and self.can_move_left:
             self.x_coordinate -= self.movement
+            self.is_facing_right = False
 
         if controlls[pygame.K_UP]:
             self.jump_key_held_down = True
 
-        else:
-            self.is_jumping = False
+        else: 
             self.jump_key_held_down = False
 
-        if self.jump_key_held_down and self.can_jump:
+        if self.is_jumping and not self.can_jump:
+            self.stay_up_in_air = True
+        
+        elif self.can_jump and self.jump_key_held_down:
             self.jump()
+        
+        if self.stay_up_in_air or (self.is_jumping and not self.jump_key_held_down):
+            self.apex()
 
         if controlls[pygame.K_DOWN] and self.can_move_down:
             self.y_coordinate += self.movement_down
@@ -114,6 +111,16 @@ class Player:
         if not controlls[pygame.K_SPACE]:
             self.space_held_in = False
 
+    def apex(self):
+        stationary_time_needed = .1
+        if self.stationary_air_time >= stationary_time_needed:
+            self.is_jumping = False
+            self.stay_up_in_air = False
+            self.stationary_air_time = 0
+
+        else:
+            self.stationary_air_time += consistency_keeper.current_speed
+
     def jump(self):
         if self.on_platform:
             self.jumped = 0 + self.jump_height
@@ -124,17 +131,26 @@ class Player:
             self.jumped += self.jump_height
 
         if self.jumped >= self.max_jump_height:
-            self.is_jumping = False
             self.can_jump = False
 
     def controls(self):
         self.movements()
+    
+    def max_jump_time(self, last_platform, gravity):
+        upwards_time = 0
+        max_y_coordinate = 0
+        if last_platform.y_coordinate + self.jump_height >= screen_height:
+            upwards_time = math.ceil((screen_height - (last_platform.y_coordinate + self.jump_height)) / self.jump_height)
+            max_y_coordinate = screen_height
 
-    def set_player_y_coordinates(self, x_coordinate, y_coordinate):
-        self.y_coordinate = y_coordinate
-        self.x_coordinate = x_coordinate
+        elif self.jump_height >= 0:
+            upwards_time = math.ceil(self.max_jump_height / self.jump_height)
+            max_y_coordinate = last_platform.y_coordinate - self.height + (upwards_time * self.movement)
+        
+        downwards_time = math.ceil(max_y_coordinate / gravity)
+        return upwards_time + downwards_time
 
-    def reset_player_location(self, platform_y_coordinate):
+    def reset_player_location(self):
         self.x_coordinate = 50
         self.y_coordinate = 50
 

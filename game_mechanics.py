@@ -1,9 +1,9 @@
-from enemies import Enemy, SimpleEnemy
 import time
 import pygame
 import time
 from important_variables import (
-    consistency_keeper
+    consistency_keeper,
+    screen_width
 )
 from items import (
     Whip,
@@ -24,91 +24,119 @@ from HUD import HUD
 from game_renderer import GameRenderer
 from generator import Generator
 from score_keeper import ScoreKeeper
-# Up is down. Down is up.
-# No spaces between functions in a class
 
 nameOfGame = "robowars"
 pygame.display.set_caption(f'{nameOfGame}')
 background = (0, 0, 0)
-
-
-def run_game():
-    hud = HUD()
-    run = True
-    doggo = Player()
-    whip = Whip()
-    platform1 = Platform()
-    physics = PhysicsEngine()
-    platforms = [platform1]
-    platforms = Generator.generate_platform(platforms, doggo, physics.gravity_pull)
-    timesIterated = 0
-    click_is_held_done = False
-    game_is_paused = False
+class GameRunner:
+    enter = """
+"""
     enemies = []
-    score_keeper = ScoreKeeper(doggo)
-    for x in range(29):
-        platorms = Generator.generate_platform(platforms, doggo, physics.gravity_pull)
+    platforms = [Platform()]
+    doggo = Player()
+    physics = PhysicsEngine()
+    pause_is_held_down = False
+    game_is_paused = False
+    def reset_variables():
+        GameRunner.enemies = []
+        GameRunner.platforms = [Platform()]
+        GameRunner.doggo = Player()
+    def game_is_paused():
+        pause_clicked = HUD.pause_clicked()
+        can_pause = not GameRunner.pause_is_held_down and pause_clicked
 
-    for x in range(28):
-        enemies = Generator.generate_enemy(platforms[x], enemies)
+        if can_pause and GameRunner.game_is_paused:
+            GameRunner.game_is_paused = False
+            return False
 
-    while run:
-        timesIterated += 1
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-        start_time = time.time()
-        win.fill(background)
-        hud.render_pause_button(game_is_paused)
-
-        hud.show_character_health(doggo.full_health, doggo.current_health)
-
-        if doggo.is_dead():
-            run = False
-
-        delete_indexes = []
-        for x in range(len(enemies)):
-            enemy = enemies[x]
-            if enemy.current_health == 0:
-                delete_indexes.append(x)
-
-            hud.show_enemy_health(enemy, enemy.full_health, enemy.current_health)
-
-        for index in delete_indexes:
-            del enemies[index]
-
-        pause_clicked = hud.pause_clicked()
-        can_pause = not click_is_held_done and pause_clicked
-
-        if can_pause and game_is_paused:
-            game_is_paused = False
-
-        elif can_pause and not game_is_paused:
-            game_is_paused = True
+        elif can_pause and not GameRunner.game_is_paused:
+            GameRunner.game_is_paused = True
+            return True
 
         if pause_clicked:
-            click_is_held_done = True
+            GameRunner.pause_is_held_down = True
 
         else:
-            click_is_held_done = False
+            GameRunner.pause_is_held_down = False
+    def generate_needed_objects():
+        while True:
+            last_platform = GameRunner.platforms[len(GameRunner.platforms) - 1]
+            last_platform_end = last_platform.x_coordinate + last_platform.length
+            if last_platform_end <= screen_width:
+                GameRunner.platforms = Generator.generate_platform(GameRunner.platforms, GameRunner.doggo, GameRunner.physics.gravity_pull)
+                GameRunner.enemies = Generator.generate_enemy(last_platform, GameRunner.enemies)
+            else: 
+                break
+        for x in range(len(GameRunner.platforms)):
+            platform = GameRunner.platforms[x]
+            if platform == None:
+                continue
+            platform_end = platform.x_coordinate + platform.length
+            if platform_end <= 0:
+                GameRunner.platforms = GameRunner.platforms[:x] + [None] + GameRunner.platforms[x + 1:]
+                GameRunner.enemies = GameRunner.enemies[:x] + [None] + GameRunner.enemies[x + 1:]
 
-        if not game_is_paused:
+        for x in range(len(GameRunner.enemies)):
+            enemy = GameRunner.enemies[x]
+            if enemy == None:
+                continue
+            if enemy.current_health <= 0:
+                GameRunner.enemies = GameRunner.enemies[:x] + [None] + GameRunner.enemies[x + 1:]
+        
 
-            if not physics.is_within_screen(doggo):
+
+    def run_game():
+        hud = HUD()
+        run = True
+        whip = Whip()
+        timesIterated = 0
+        click_is_held_done = False
+        game_is_paused = False 
+        score_keeper = ScoreKeeper(GameRunner.doggo)
+    
+        while run:
+            GameRunner.generate_needed_objects()
+            timesIterated += 1
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+            
+            start_time = time.time()
+            win.fill(background)
+            HUD.render_pause_button(game_is_paused)
+
+            HUD.show_character_health(GameRunner.doggo.full_health, GameRunner.doggo.current_health)
+
+            if GameRunner.doggo.is_dead():
                 run = False
 
-            GameRenderer.render_players_and_platforms(platforms, doggo, whip)
-            GameRenderer.render_enemies(enemies, platforms, doggo)
-            GameRenderer.interactions_runner(doggo, whip, enemies)
-        # The draw and update are here so the game doesn't make them disappear,
-        # so put draw functions here or both!
-        score_keeper.give_score(doggo)
-        GameRenderer.draw_everything(doggo, enemies, platforms)
-        pygame.display.update()
-        end_time = time.time()
-        consistency_keeper.change_current_speed(end_time - start_time)
-        consistency_keeper.change_new_speed(end_time - start_time)
+            
 
-    run_game()
+            if not GameRunner.game_is_paused():
+
+                if not GameRunner.physics.is_within_screen(GameRunner.doggo):
+                    run = False
+
+                GameRenderer.render_players_and_platforms(GameRunner.platforms, GameRunner.doggo, whip)
+                GameRenderer.render_enemies(GameRunner.enemies, GameRunner.platforms, GameRunner.doggo)
+                GameRenderer.interactions_runner(GameRunner.doggo, whip, GameRunner.enemies)
+            # The draw and update are here so the game doesn't make them disappear,
+            # so put draw functions here or both!
+            score_keeper.give_score(GameRunner.doggo)
+            GameRenderer.draw_everything(GameRunner.doggo, GameRunner.enemies, GameRunner.platforms)
+            pygame.display.update()
+            end_time = time.time()
+            time_taken = end_time - start_time
+            if time_taken > 0:
+                consistency_keeper.change_current_speed(time_taken)
+                consistency_keeper.change_new_speed(time_taken)
+        GameRunner.reset_variables()
+        GameRunner.run_game()
 
 
+def average(numbers):
+    total = 0
+    for number in numbers:
+        total += number
+
+    return total / len(numbers)

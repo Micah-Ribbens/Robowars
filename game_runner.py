@@ -1,5 +1,2 @@
-from game_mechanics import run_game
-
-run_game()
-
-
+from game_mechanics import GameRunner
+GameRunner.run_game() 

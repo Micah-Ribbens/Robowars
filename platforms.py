@@ -1,5 +1,4 @@
 from important_variables import (
-    screen_width,
     screen_height,
     win
 )
@@ -8,7 +7,7 @@ import pygame
 
 class Platform:
     platform_color = (80, 21, 46)
-    x_coordinate = screen_width * .1
+    x_coordinate = 100
     y_coordinate = screen_height - 100
     length = 400
     width = 100

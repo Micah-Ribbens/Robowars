@@ -1,6 +1,8 @@
+from typing import NewType
 from important_variables import (
     screen_width,
     screen_height,
+    consistency_keeper
 )
 from platforms import Platform
 from enemies import SimpleEnemy
@@ -14,102 +16,60 @@ def platform_copy(platform):
     copy.y_coordinate = platform.y_coordinate
     return copy
 
+
 def generate_platform_length():
-    return random.randint(screen_width * .1, screen_width * .04)
+    return random.randrange(int(screen_width * .3), int(screen_width * .4))
 
 
 def generate_platform_width():
-    return random.randint(screen_height * .05, screen_height * .1)
+    return random.randrange(int(screen_height * .1), int(screen_height * .2))
 
 
-def generate_platform_x_coordinate(jump_seconds, player_movement,
+def generate_platform_x_coordinate(max_jump_time, player_movement,
                                    platform):
-
-    max_space_apart = jump_seconds * player_movement
-    min_space_apart = max_space_apart / 2
+    # Little bit of a buffer, so jump isn't too hard
+    max_space_apart = max_jump_time * player_movement * .6
+    min_space_apart = max_space_apart / 1.3
     platform_end = platform.x_coordinate + platform.length
+    platform_end = platform.x_coordinate + platform.length
+    max_platform_end = screen_width - (platform.length / 2)
 
-    min_x_coordinate = (min_space_apart + platform_end // 1) * 1000
-    max_x_coordinate = (max_space_apart + platform_end // 1) * 1000
+    # Gurrantees that when player is halfway across platform that he can see the entire
+    # other platform
+    if max_space_apart > max_platform_end - platform.length:
+        max_space_apart = max_platform_end - platform.length
+    
+    if min_space_apart > (max_platform_end - platform.length) * .95:
+        min_space_apart = (max_platform_end - platform.length) * .95 
 
-    return random.randrange(min_x_coordinate,
-                            max_x_coordinate) / 1000
+    max_x_coordinate = max_space_apart + platform_end
+    min_x_coordinate = min_space_apart + platform_end
 
-
-def generate_platform_y_coordinate(player, platform):
-    max_height = screen_height - platform.height
-    min_height = player.height * 1.5
-    return random.randrange(min_height, max_height)
-
-
-def jump_seconds(player, gravity):
-    change_in_y = 0
-    time_jumping = 0
-    is_falling = False
-    while True:
-        is_within_screen = player.y_coordinate <= screen_height
-        is_bigger_than_max_jump = change_in_y >= player.max_jump_height
-        can_jump = (is_within_screen and not is_bigger_than_max_jump
-                    and not is_falling)
-
-        if can_jump:
-            change_in_y += player.jump_height
-            time_jumping += 1
-
-        if not can_jump:
-            is_falling = True
-            time_jumping += 1
-            change_in_y -= gravity
-
-        if change_in_y <= 0 and is_falling:
-            return time_jumping
+    return random.randrange(int(min_x_coordinate), int(max_x_coordinate) + 1)
 
 
-def needed_y_coordinate(x_coordinate, player, last_platform, gravity):
-    movement = player.movement
-    is_falling = False
-    change_in_y = 0
-    distance_traveled = 0
+def generate_platform_y_coordinate(player, last_platform, platform_width):
+    max_height = 0
+    if last_platform.y_coordinate + player.jump_height >= screen_height * .75:
+        max_height = screen_height * .6
 
-    platform_end = last_platform.x_coordinate + last_platform.length
-    distance_needed = x_coordinate - platform_end
+    else: 
+        max_height = 0 + (((player.max_jump_height + last_platform.y_coordinate) - player.height - platform_width) * .8)
 
-    while True:
-        is_within_screen = player.y_coordinate <= screen_height
-        is_bigger_than_max_jump = change_in_y >= player.max_jump_height
-        can_jump = (is_within_screen and not is_bigger_than_max_jump
-                    and not is_falling)
-
-        if can_jump:
-            change_in_y += player.jump_height
-            distance_traveled += movement
-
-        if not can_jump:
-            is_falling = True
-            change_in_y -= gravity
-            distance_traveled += movement
-
-        if distance_traveled >= distance_needed and is_falling:
-            # So the player does not have to have a perfect jump to get to the platform
-            min_player_buffer = player.movement * 200
-            max_player_buffer = player.movement * 400
-            
-            player_buffer = random.randint(min_player_buffer, max_player_buffer)
-            return last_platform.y_coordinate - change_in_y + player_buffer
-
+    min_height = screen_height -  last_platform.width
+    return random.randrange(int(max_height), int(min_height + 1))
 
 class Generator:
     def generate_platform(platforms, player, gravity):
+        new_platform = Platform()
         last_platform = platforms[len(platforms) - 1]
-        x_coordinate = generate_platform_x_coordinate(jump_seconds(player, gravity),
-                                                      player.movement,
-                                                      last_platform)
-        new_platform = platform_copy(last_platform)
+        new_platform.width = generate_platform_width()
+        y_coordinate = generate_platform_y_coordinate(player, last_platform, new_platform.width)
 
-        new_platform.x_coordinate = x_coordinate
+        new_platform.length = generate_platform_length()
+        new_platform.y_coordinate = y_coordinate
         new_platform.platform_color = (0, 250, 0)
-        new_platform.y_coordinate = needed_y_coordinate(x_coordinate,
-                                                        player, last_platform, gravity)
+        new_platform.x_coordinate = generate_platform_x_coordinate(player.max_jump_time(last_platform, gravity), player.movement, last_platform)
 
         platforms.append(new_platform)
         return platforms
@@ -125,4 +85,3 @@ class Generator:
         enemies.append(new_enemy)
 
         return enemies
-

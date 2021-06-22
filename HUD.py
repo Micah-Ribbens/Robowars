@@ -16,23 +16,24 @@ class HUD:
     height = screen_height * .05
     color = (250, 250, 250)
     font = pygame.font.Font('freesansbold.ttf', 15)
+    pause_font = pygame.font.Font('freesansbold.ttf', 53)
 
-    def render_pause_button(self, is_paused):
+    def render_pause_button(is_paused):
         if is_paused:
-            self.show_pause_screen()
+            HUD.show_pause_screen()
 
         else:
             pass
 
-        pygame.draw.rect(win, (self.color), (self.x_coordinate_1,
-                         self.y_coordinate, self.width, self.height))
-        pygame.draw.rect(win, (self.color), (self.x_coordinate_2,
-                         self.y_coordinate, self.width, self.height))
+        pygame.draw.rect(win, (HUD.color), (HUD.x_coordinate_1,
+                         HUD.y_coordinate, HUD.width, HUD.height))
+        pygame.draw.rect(win, (HUD.color), (HUD.x_coordinate_2,
+                         HUD.y_coordinate, HUD.width, HUD.height))
 
-    def pause_clicked(self):
-        width = (self.x_coordinate_2 - self.x_coordinate_1) + self.width
-        area = pygame.Rect(self.x_coordinate_1, self.y_coordinate, width,
-                           self.height)
+    def pause_clicked():
+        width = (HUD.x_coordinate_2 - HUD.x_coordinate_1) + HUD.width
+        area = pygame.Rect(HUD.x_coordinate_1, HUD.y_coordinate, width,
+                           HUD.height)
         mouse_x, mouse_y = pygame.mouse.get_pos()
         clicked = pygame.mouse.get_pressed()[0]
 
@@ -41,19 +42,18 @@ class HUD:
 
         return False
 
-    def show_pause_screen(self):
-        font = pygame.font.Font('freesansbold.ttf', 45)
+    def show_pause_screen():
         message = "Paused"
         black = (0, 0, 0)
         white = (255, 255, 255)
-        text = font.render(message, True, white, black)
+        text = HUD.pause_font.render(message, True, white, black)
         text_rect = text.get_rect()
         text_rect.center = (screen_width / 2,
                             screen_height / 2)
 
         win.blit(text, text_rect)
 
-    def show_character_health(self, full_health, health_remaining):
+    def show_character_health(full_health, health_remaining):
         if health_remaining == 0:
             return
         lost_health = full_health - health_remaining
@@ -61,7 +61,7 @@ class HUD:
         message = f"Health {health_remaining}/{full_health}"
         black = (0, 0, 0)
         white = (255, 255, 255)
-        text = self.font.render(message, True, white, black)
+        text = HUD.font.render(message, True, white, black)
         text_rect = text.get_rect()
         text_x_coordinate = 0 + screen_width * .01
         text_y_coordinate = 0 + screen_height * .04
@@ -83,16 +83,16 @@ class HUD:
                          text_y_coordinate + screen_height * .04,
                          lost_health_length, screen_height * .04))
 
-    def show_enemy_health(self, enemy, full_health, health_remaining):
-        if health_remaining == 0:
+    def show_enemy_health(enemy):
+        if enemy.current_health == 0:
             return
 
-        lost_health = full_health - health_remaining
+        lost_health = enemy.full_health - enemy.current_health
         x_coordinate = enemy.x_coordinate
         y_coordinate = enemy.y_coordinate
         color = (0, 250, 0)
-        ratio = enemy.width / full_health
-        health_remaining_length = ratio * health_remaining
+        ratio = enemy.width / enemy.full_health
+        health_remaining_length = ratio * enemy.current_health
         lost_health_length = ratio * lost_health
         width = screen_height * .01
         pygame.draw.rect(win, (color), (x_coordinate, y_coordinate - width,
@@ -102,12 +102,12 @@ class HUD:
         pygame.draw.rect(win, (color), (x_coordinate + health_remaining_length,
                          y_coordinate - width, lost_health_length, width))
     
-    def show_score(self, distance_traveled):
+    def show_score(distance_traveled):
         message = f"Distance: {distance_traveled}"
 
         black = (0, 0, 0)
         white = (255, 255, 255)
-        text = self.font.render(message, True, white, black)
+        text = HUD.font.render(message, True, white, black)
         text_rect = text.get_rect()
         text_x_coordinate = 0 + screen_width * .008
         text_y_coordinate = 0 + screen_height * .15
