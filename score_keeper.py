@@ -11,7 +11,7 @@ class ScoreKeeper:
         self.last_player_location = player.x_coordinate
 
     def give_score(self, player):
-        hud = HUD()
+        # hud = HUD()
         is_moving_left = False
         is_moving_right = False
 

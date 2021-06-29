@@ -22,13 +22,15 @@ class Enemy:
 
 class SimpleEnemy(Enemy):
     movement_speed = screen_width * .0001
+    base_speed = screen_width * .0002
     is_moving_left = True
     is_moving_right = False
     damage = 5
 
     def _improve_variables(self):
-        self.movement_speed = screen_width * (
-            consistency_keeper.calculate_new_speed(.00025))
+        # pass
+        # print(consistency_keeper.calculate_new_speed(1))
+        self.movement_speed = consistency_keeper.calculate_new_speed(self.base_speed)
 
     def movement(self, is_on_platform, platform):
         self._improve_variables()

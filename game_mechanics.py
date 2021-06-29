@@ -1,10 +1,14 @@
 import time
 import pygame
 import time
+
+from pygame.sprite import LayeredUpdates
+from wall_of_death import WallOfDeath
 from important_variables import (
     consistency_keeper,
     screen_width
 )
+from engines import InteractionsFinder
 from items import (
     Whip,
 )
@@ -38,9 +42,12 @@ class GameRunner:
     pause_is_held_down = False
     game_is_paused = False
     def reset_variables():
-        GameRunner.enemies = []
+        GameRunner.enemies = [None]
+        # GameRunner.enemies.append()
         GameRunner.platforms = [Platform()]
         GameRunner.doggo = Player()
+        GameRunner.doggo.y_coordinate = GameRunner.platforms[0].y_coordinate - GameRunner.doggo.height
+        WallOfDeath.reset()
     def game_is_paused():
         pause_clicked = HUD.pause_clicked()
         can_pause = not GameRunner.pause_is_held_down and pause_clicked
@@ -59,14 +66,6 @@ class GameRunner:
         else:
             GameRunner.pause_is_held_down = False
     def generate_needed_objects():
-        while True:
-            last_platform = GameRunner.platforms[len(GameRunner.platforms) - 1]
-            last_platform_end = last_platform.x_coordinate + last_platform.length
-            if last_platform_end <= screen_width:
-                GameRunner.platforms = Generator.generate_platform(GameRunner.platforms, GameRunner.doggo, GameRunner.physics.gravity_pull)
-                GameRunner.enemies = Generator.generate_enemy(last_platform, GameRunner.enemies)
-            else: 
-                break
         for x in range(len(GameRunner.platforms)):
             platform = GameRunner.platforms[x]
             if platform == None:
@@ -82,6 +81,18 @@ class GameRunner:
                 continue
             if enemy.current_health <= 0:
                 GameRunner.enemies = GameRunner.enemies[:x] + [None] + GameRunner.enemies[x + 1:]
+        while True:
+            last_platform = GameRunner.platforms[len(GameRunner.platforms) - 1]
+            last_platform_end = last_platform.x_coordinate + last_platform.length
+            if last_platform_end > screen_width:
+                # print("BREAK")
+                return
+            # print("MAKE")
+            GameRunner.platforms = Generator.generate_platform(GameRunner.platforms, GameRunner.doggo, GameRunner.physics.gravity_pull)
+            last_platform = GameRunner.platforms[len(GameRunner.platforms) - 1]
+            last_platform_end = last_platform.x_coordinate + last_platform.length
+            GameRunner.enemies = Generator.generate_enemy(last_platform, GameRunner.enemies)
+
         
 
 
@@ -93,15 +104,14 @@ class GameRunner:
         click_is_held_done = False
         game_is_paused = False 
         score_keeper = ScoreKeeper(GameRunner.doggo)
-    
+        GameRunner.reset_variables()
         while run:
+            start_time = time.time()
             GameRunner.generate_needed_objects()
-            timesIterated += 1
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-            
-            start_time = time.time()
+
             win.fill(background)
             HUD.render_pause_button(game_is_paused)
 
@@ -109,8 +119,6 @@ class GameRunner:
 
             if GameRunner.doggo.is_dead():
                 run = False
-
-            
 
             if not GameRunner.game_is_paused():
 
@@ -124,13 +132,23 @@ class GameRunner:
             # so put draw functions here or both!
             score_keeper.give_score(GameRunner.doggo)
             GameRenderer.draw_everything(GameRunner.doggo, GameRunner.enemies, GameRunner.platforms)
+            # WallOfDeath.move()
+            InteractionsFinder.player_wall_of_death_interactions(GameRunner.doggo)
+            # print(WallOfDeath.x_coordinate)
+            # if WallOfDeath.x_coordinate == 0:
+                # print(WallOfDeath.x_coordinate)
+                # print(WallOfDeath.x_coordinate >= 0)
+                # print("I CALLED")
+                # print("DRAW")
+            WallOfDeath.draw()
+
             pygame.display.update()
             end_time = time.time()
             time_taken = end_time - start_time
             if time_taken > 0:
                 consistency_keeper.change_current_speed(time_taken)
-                consistency_keeper.change_new_speed(time_taken)
-        GameRunner.reset_variables()
+                # consistency_keeper.change_new_speed(time_taken)
+        # GameRunner.reset_variables()
         GameRunner.run_game()
 
 

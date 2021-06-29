@@ -11,11 +11,16 @@ class ConsistencyKeeper:
     def __init__(self, streamlined_speed):
         self.streamlined_speed = streamlined_speed
 
-    def change_new_speed(self, new_speed):
-        self.new_speed = new_speed
+    # def change_new_speed(self, new_speed):
+
+    #     self.new_speed = new_speed
 
     def calculate_new_speed(self, movement):
-        return (self.new_speed / self.streamlined_speed) * movement
+        if self.current_speed / self.streamlined_speed == 0:
+            return movement
+        return (self.current_speed / self.streamlined_speed) * movement
 
     def change_current_speed(self, current_speed):
+        # if current_speed / self.streamlined_speed == 0:
+        #     return
         self.current_speed = current_speed

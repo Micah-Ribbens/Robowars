@@ -8,9 +8,9 @@ import pygame
 class Platform:
     platform_color = (80, 21, 46)
     x_coordinate = 100
-    y_coordinate = screen_height - 100
-    length = 400
     width = 100
+    y_coordinate = screen_height - width
+    length = 400
 
     def get_x_coordinate(self):
         return self.x_coordinate

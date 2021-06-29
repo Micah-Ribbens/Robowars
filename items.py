@@ -4,7 +4,7 @@ from important_variables import (
     screen_height,
     screen_width,
     consistency_keeper, 
-    file
+    # file
 )
 from players import Player
 

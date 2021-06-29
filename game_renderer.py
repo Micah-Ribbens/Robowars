@@ -83,6 +83,9 @@ class GameRenderer:
         elif physics_engine.is_beyond_screen_right(player):
             player.can_move_right = False
         
+        else: 
+            player.can_move_right = True
+        
         if player_hit_platform_right_edge:
             player.can_move_left = False
             player.x_coordinate = platform_player_collided_into.x_coordinate + platform_player_collided_into.length
@@ -113,5 +116,6 @@ class GameRenderer:
             player.x_coordinate = platform_player_on.x_coordinate
 
         player.movements()
+        physics_engine.screen_boundaries(player)
         GameRenderer.last_character_bottom = player.y_coordinate + player.height
         GameRenderer.last_player_x_coordinate = player.x_coordinate
