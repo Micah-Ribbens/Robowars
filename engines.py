@@ -5,6 +5,7 @@ from important_variables import (
     screen_width,
     consistency_keeper
 )
+from wall_of_death import WallOfDeath
 
 class CollisionsFinder:
     # Player or Enemy for character
@@ -25,12 +26,14 @@ class CollisionsFinder:
             character.x_coordinate <= platform.x_coordinate + platform.length)
             
         character_bottom = character.y_coordinate + character.height
-        platform_bottom = platform.y_coordinate + platform.width
+        # platform_bottom = platform.y_coordinate + platform.width
 
         within_platform_height = character_bottom >= platform.y_coordinate
         # Prevents character from clipping on top of platform
-        if last_character_bottom is not None:
-            return within_platform_height and within_platform_length and last_character_bottom - character.movement_down <= platform.y_coordinate
+        # if last_character_bottom is not None:
+        #     # print(last_character_bottom < platform.x_coordinate)
+        #     return within_platform_height and within_platform_length and last_character_bottom < platform.y_coordinate
+
         return within_platform_height and within_platform_length
         
     def platform_right_boundary(character, platform, last_player_x_coordinate):
@@ -45,7 +48,7 @@ class CollisionsFinder:
         right_side_collision = (character.x_coordinate <= platform_end and
                                character_right_edge >= platform.x_coordinate
                                and last_player_x_coordinate >= platform_end - character.movement)
-
+        
         return y_coordinate_collision and right_side_collision
 
     def platform_left_boundary(character, platform, last_player_x_coordinate):
@@ -69,7 +72,7 @@ class PhysicsEngine:
         self.gravity_pull = screen_height * consistency_keeper.calculate_new_speed(.0005)
 
     def set_gravity(self, gravity):
-        self.gravity_pull = gravity
+        PhysicsEngine.gravity_pull = gravity
 
     def do_gravity(self, character):
         character.y_coordinate += self.gravity_pull
@@ -86,14 +89,16 @@ class PhysicsEngine:
 
         return False
 
-    def screen_boundaries(self, player):
+    def screen_boundaries(self, player: Player):
+        # print("I WAS CALLED")
         if player.y_coordinate <= 0:
+            # print("NO MORE JUMPING!")
             player.can_jump = False
 
-        else:
-            player.can_jump = True
+        # else:
+        #     player.can_jump = True
 
-        self.within_screen(player)
+        # self.is_within_screen(player)
 
     def is_within_screen(self, player):
         if player.y_coordinate >= screen_height:
@@ -156,3 +161,13 @@ class InteractionsFinder:
         
         elif y_coordinate_collision and x_coordinate_collision and not whip.whip_is_going_right:
             enemy.knockback_left()
+    
+    def player_wall_of_death_interactions(player: Player):
+        if player.move_right:
+            WallOfDeath.move_backwards(player.movement)
+        
+        wall_of_death_end = WallOfDeath.x_coordinate + WallOfDeath.length
+        if wall_of_death_end >= player.x_coordinate:
+            player.current_health = 0
+        
+

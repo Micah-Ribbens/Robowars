@@ -37,6 +37,7 @@ class Player:
     stationary_air_time = 0
 
     def _improve_variables(self):
+        # print(self.jump_height)
         self.movement = screen_width * (
             consistency_keeper.calculate_new_speed(0.0004))
 
@@ -45,6 +46,8 @@ class Player:
 
         self.jump_height = screen_height * (
             consistency_keeper.calculate_new_speed(.002))
+        # print(consistency_keeper.calculate_new_speed(1))
+        # print(self.jump_height)
 
     def draw(self):
         pygame.draw.rect(win, (self.player_color), (self.x_coordinate,
@@ -96,6 +99,7 @@ class Player:
             self.jump()
         
         if self.stay_up_in_air or (self.is_jumping and not self.jump_key_held_down):
+            # print("DO A APEX")
             self.apex()
 
         if controlls[pygame.K_DOWN] and self.can_move_down:
@@ -136,18 +140,19 @@ class Player:
     def controls(self):
         self.movements()
     
-    def max_jump_time(self, last_platform, gravity):
+    def max_jump_time(self, new_platform_y_coordinate, last_platform_y_coordinate, gravity):
         upwards_time = 0
         max_y_coordinate = 0
-        if last_platform.y_coordinate + self.jump_height >= screen_height:
-            upwards_time = math.ceil((screen_height - (last_platform.y_coordinate + self.jump_height)) / self.jump_height)
-            max_y_coordinate = screen_height
+        # Top of screen is 0
+        if last_platform_y_coordinate - self.max_jump_height <= 0:
+            upwards_time = math.ceil((last_platform_y_coordinate - self.height) / self.jump_height)
+            max_y_coordinate = self.height
 
-        elif self.jump_height >= 0:
+        else:
+            max_y_coordinate = last_platform_y_coordinate - self.max_jump_height
             upwards_time = math.ceil(self.max_jump_height / self.jump_height)
-            max_y_coordinate = last_platform.y_coordinate - self.height + (upwards_time * self.movement)
-        
-        downwards_time = math.ceil(max_y_coordinate / gravity)
+        downwards_time = math.ceil((new_platform_y_coordinate - max_y_coordinate) / gravity)
+
         return upwards_time + downwards_time
 
     def reset_player_location(self):
