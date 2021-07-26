@@ -9,18 +9,17 @@ from HUD import HUD
 class GameRenderer:
     last_player_x_coordinate = 0
     last_character_bottom = 0
+    last_enemy_x_coordiantes = []
     def player_platform_runner(player, platform):
         if platform == None:
             return
-        physics_engine = PhysicsEngine()
-        physics_engine.platform_side_scrolling(player, platform)
+        PhysicsEngine.platform_side_scrolling(player, platform)
 
     def _render_enemy(enemy, platform, player):
-        physics_engine = PhysicsEngine()
-        physics_engine.enemy_side_scrolling(player, enemy)
+        PhysicsEngine.enemy_side_scrolling(player, enemy)
         HUD.show_enemy_health(enemy)
         if not CollisionsFinder.on_platform(platform, enemy):
-            physics_engine.do_gravity(enemy)
+            PhysicsEngine.do_gravity(enemy)
         else:
             enemy.movement(CollisionsFinder.enemy_on_platform(platform, enemy), platform)
 
@@ -44,14 +43,15 @@ class GameRenderer:
             platform.draw()
 
     def interactions_runner(player, whip, enemies):
-        for enemy in enemies:
+        for x in range(len(enemies) - 1):
+            enemy = enemies[x]
             if enemy == None:
                 continue
             InteractionsFinder.enemy_whip_interactions(enemy, whip)
-            InteractionsFinder.player_enemy_interactions(player, enemy)
+            InteractionsFinder.player_enemy_interactions(player, enemy, GameRenderer.last_player_x_coordinate, GameRenderer.last_enemy_x_coordiantes[x])
+            GameRenderer.last_enemy_x_coordiantes[x] = enemy.x_coordinate
 
     def render_players_and_platforms(platforms, player, whip):
-        physics_engine = PhysicsEngine()
         InteractionsFinder.player_whip(player, whip)
         player_hit_platform_right_edge = False
         player_hit_platform_left_edge = False
@@ -80,7 +80,7 @@ class GameRenderer:
             player.can_move_right = False
             player.x_coordinate = platform_player_collided_into.x_coordinate - player.width
 
-        elif physics_engine.is_beyond_screen_right(player):
+        elif PhysicsEngine.is_beyond_screen_right(player):
             player.can_move_right = False
         
         else: 
@@ -90,7 +90,7 @@ class GameRenderer:
             player.can_move_left = False
             player.x_coordinate = platform_player_collided_into.x_coordinate + platform_player_collided_into.length
             
-        elif physics_engine.is_beyond_screen_left(player):
+        elif PhysicsEngine.is_beyond_screen_left(player):
             player.can_move_left = False
 
         else:
@@ -101,7 +101,7 @@ class GameRenderer:
             player.on_platform = False
 
         if not player_is_on_platform and not player.is_jumping:
-            physics_engine.do_gravity(player)
+            PhysicsEngine.do_gravity(player)
             
         if player_is_on_platform:
             player.can_move_down = False
@@ -116,6 +116,6 @@ class GameRenderer:
             player.x_coordinate = platform_player_on.x_coordinate
 
         player.movements()
-        physics_engine.screen_boundaries(player)
-        GameRenderer.last_character_bottom = player.y_coordinate + player.height
-        GameRenderer.last_player_x_coordinate = player.x_coordinate
+        PhysicsEngine.screen_boundaries(player)
+        # GameRenderer.last_character_bottom = player.y_coordinate + player.height
+        # GameRenderer.last_player_x_coordinate = player.x_coordinate

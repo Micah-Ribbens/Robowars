@@ -1,7 +1,9 @@
 from important_variables import (
     screen_height,
+    screen_width,
     win
 )
+from velocity_calculator import VelocityCalculator
 import pygame
 
 
@@ -10,20 +12,8 @@ class Platform:
     x_coordinate = 100
     width = 100
     y_coordinate = screen_height - width
-    length = 400
-
-    def get_x_coordinate(self):
-        return self.x_coordinate
-
-    def get_y_coordinate(self):
-        return self.y_coordinate
-
-    def change_x_coordinate(self, x_coordinate):
-        self.x_coordinate = x_coordinate
-
-    def change_y_coordinate(self, y_coordinate):
-        self.y_coordinate = y_coordinate
-
+    length = VelocityCalculator.give_measurement(screen_width, 50)
+    
     def draw(self):
         pygame.draw.rect(win, (self.platform_color), (self.x_coordinate,
                          self.y_coordinate, self.length, self.width))
