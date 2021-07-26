@@ -14,6 +14,7 @@ from platforms import Platform
 
 class CollisionsFinder:
     # Player or Enemy for character
+    #fix collisions with left and right side of platform
     def enemy_on_platform(platform: Platform, enemy: SimpleEnemy):
         enemy_right_edge = enemy.x_coordinate + enemy.width
         platform_end = platform.x_coordinate + platform.length
@@ -58,6 +59,7 @@ class CollisionsFinder:
         return CollisionsFinder.platform_collision(character, platform) and last_character_right_edge < platform.x_coordinate
 
 class PhysicsEngine:
+    # TODO change me back to 1121
     gravity_pull = y_velocities
     character_died = False
     
@@ -88,11 +90,11 @@ class PhysicsEngine:
 
     def platform_side_scrolling(player: Player, platform: Platform):
         if player.move_right:
-            platform.move_left(VelocityCalculator.calc_distance(player.running_velocity))
+            platform.move_left(VelocityCalculator.calc_distance(player.left_and_right_velocity))
 
     def enemy_side_scrolling(player: Player, enemy: SimpleEnemy):
         if player.move_right:
-            enemy.side_scroll(VelocityCalculator.calc_distance(player.running_velocity))
+            enemy.side_scroll(VelocityCalculator.calc_distance(player.left_and_right_velocity))
 
 
 class InteractionsFinder:
@@ -103,6 +105,7 @@ class InteractionsFinder:
         whip.render(player)
 
     def player_enemy_interactions(player: Player, enemy: SimpleEnemy, last_player_x_coordinate, last_enemy_x_coordinate):
+        # TODO fix knockback so that it is smoother
         enemy_right_side = enemy.x_coordinate + enemy.width
         player_bottom = player.y_coordinate + player.height
         enemy_bottom = enemy.y_coordinate + enemy.height
@@ -116,29 +119,18 @@ class InteractionsFinder:
         y_coordinate_collision = (player_bottom >= enemy.y_coordinate
                                   and player.y_coordinate <= enemy_bottom)
         x_coordinate_collision = left_collision or right_collision
-        if not (y_coordinate_collision and x_coordinate_collision):
-            return
-        player_half = player.x_coordinate + .5 * player.width
-        enemy_half = enemy.x_coordinate + .5 * enemy.width
-        if last_player_x_coordinate + player.width < last_enemy_x_coordinate:
+        if x_coordinate_collision and y_coordinate_collision and last_player_x_coordinate + player.width < last_enemy_x_coordinate:
             player.knockback_left()
 
-        elif last_player_x_coordinate > last_enemy_x_coordinate + enemy.width:
+        elif x_coordinate_collision and y_coordinate_collision and last_player_x_coordinate > last_enemy_x_coordinate + enemy.width:
             player.knockback_right()
-
-        elif player_half >= enemy_half:
-            player.knockback_right()
-        
-        else:
-            player.knockback_left()
-        
 
     def enemy_whip_interactions(enemy: SimpleEnemy, whip: Whip):
+        # TODO fix knockback so that it is smoother and the enemy is always knocked the correct direction
         if not whip.whip_is_extending:
             return
         enemy_right_edge = enemy.x_coordinate + enemy.width
-        whip_left_end = whip.x_coordinate + whip.length
-        collision_left = whip.x_coordinate >= enemy_right_edge and whip_left_end <= enemy_right_edge
+        collision_left = whip.x_coordinate + whip.length
  
         collision_right = (whip.x_coordinate <= enemy.x_coordinate + enemy.width
                            and whip.x_coordinate + whip.length >= enemy_right_edge)
@@ -155,7 +147,7 @@ class InteractionsFinder:
     
     def player_wall_of_death_interactions(player: Player):
         if player.move_right:
-            WallOfDeath.move_backwards(VelocityCalculator.calc_distance(player.running_velocity))
+            WallOfDeath.move_backwards(VelocityCalculator.calc_distance(player.left_and_right_velocity))
         
         wall_of_death_end = WallOfDeath.x_coordinate + WallOfDeath.length
         if wall_of_death_end >= player.x_coordinate:

@@ -1,3 +1,4 @@
+# TODO Have target velocities and use time to multiply it out
 class VelocityCalculator:
     # As in the time it took for there to be one iteration  
     time = 0

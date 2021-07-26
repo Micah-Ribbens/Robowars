@@ -19,7 +19,8 @@ class Player:
     y_coordinate = screen_height - 200
     width = VelocityCalculator.give_measurement(screen_width, 5)
     height = VelocityCalculator.give_measurement(screen_height, 15)
-    running_velocity = VelocityCalculator.give_velocity(screen_width, 448)
+    # TODO think of a better name
+    left_and_right_velocity = VelocityCalculator.give_velocity(screen_width, 448)
     downwards_velocity = VelocityCalculator.give_velocity(screen_height, 1121)
     jumped = 0
     can_move_down = True
@@ -76,13 +77,13 @@ class Player:
             self.move_right = True
 
         elif move_right_possible:
-            self.x_coordinate += VelocityCalculator.calc_distance(self.running_velocity)
+            self.x_coordinate += VelocityCalculator.calc_distance(self.left_and_right_velocity)
 
         else:
             self.move_right = False
 
         if controlls[pygame.K_LEFT] and self.can_move_left:
-            self.x_coordinate -= VelocityCalculator.calc_distance(self.running_velocity)
+            self.x_coordinate -= VelocityCalculator.calc_distance(self.left_and_right_velocity)
             self.is_facing_right = False
 
         if controlls[pygame.K_UP]:
@@ -125,7 +126,6 @@ class Player:
             self.stationary_air_time += VelocityCalculator.time
 
     def jump(self):
-        # print("JUMPED CALLED")
         if self.on_platform:
             self.jumped = 0 + VelocityCalculator.calc_distance(self.upwards_velocity)
             self.is_jumping = True
@@ -140,19 +140,18 @@ class Player:
     def controls(self):
         self.movements()
     
-    def max_time_in_air(self, new_platform_y_coordinate, last_platform_y_coordinate, gravity):
+    def max_jump_time(self, new_platform_y_coordinate, last_platform_y_coordinate, gravity):
         upwards_time = 0
         max_y_coordinate = 0
-        # Checks if the player once jumping hits the top of the screen, which is at 0
-        if last_platform_y_coordinate - self.max_jump_height - self.height <= 0:
-            upwards_time = (last_platform_y_coordinate - self.height) / self.upwards_velocity
+        # Top of screen is 0
+        if last_platform_y_coordinate - self.max_jump_height <= 0:
+            upwards_time = math.ceil((last_platform_y_coordinate - self.height) / self.upwards_velocity)
             max_y_coordinate = self.height
-            print("CALLED")
 
         else:
             max_y_coordinate = last_platform_y_coordinate - self.max_jump_height
-            upwards_time = self.max_jump_height / self.upwards_velocity
-        downwards_time = (new_platform_y_coordinate - max_y_coordinate) / gravity
+            upwards_time = math.ceil(self.max_jump_height / self.upwards_velocity)
+        downwards_time = math.ceil((new_platform_y_coordinate - max_y_coordinate) / gravity)
 
         return upwards_time + downwards_time
 

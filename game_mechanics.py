@@ -41,29 +41,31 @@ class GameRunner:
     doggo = Player()
     # physics = PhysicsEngine()
     pause_is_held_down = False
-    game_paused = False
+    # game_is_paused = False
     def reset_variables():
         GameRunner.enemies = [None]
         GameRunner.platforms = [Platform()]
         GameRunner.doggo = Player()
         GameRunner.doggo.y_coordinate = GameRunner.platforms[0].y_coordinate - GameRunner.doggo.height - 1
         WallOfDeath.reset()
-        ScoreKeeper.reset()
 
     def game_is_paused():
         pause_clicked = HUD.pause_clicked()
         can_pause = not GameRunner.pause_is_held_down and pause_clicked
+
+        if can_pause and GameRunner.game_is_paused:
+            # GameRunner.game_is_paused = False
+            return False
+
+        elif can_pause and not GameRunner.game_is_paused:
+            # GameRunner.game_is_paused = True
+            return True
 
         if pause_clicked:
             GameRunner.pause_is_held_down = True
 
         else:
             GameRunner.pause_is_held_down = False
-        if can_pause:
-            print("CLICKED")
-            GameRunner.game_paused = not GameRunner.game_paused
-        return GameRunner.game_paused
-
 
     def generate_needed_objects():
         for x in range(len(GameRunner.platforms)):
@@ -82,7 +84,6 @@ class GameRunner:
                 continue
             if enemy.current_health <= 0:
                 GameRunner.enemies = GameRunner.enemies[:x] + [None] + GameRunner.enemies[x + 1:]
-                
         while True:
             last_platform = GameRunner.platforms[len(GameRunner.platforms) - 1]
             last_platform_end = last_platform.x_coordinate + last_platform.length
@@ -101,7 +102,7 @@ class GameRunner:
         player_x_coordinates = []
         run = True
         whip = Whip()
-        game_paused = False 
+        game_is_paused = False 
         ScoreKeeper.set_player(GameRunner.doggo)
         GameRunner.reset_variables()
         while run:
@@ -112,7 +113,7 @@ class GameRunner:
                     pygame.quit()
 
             win.fill(background)
-            HUD.render_pause_button(GameRunner.game_is_paused())
+            HUD.render_pause_button(game_is_paused)
 
             HUD.show_character_health(GameRunner.doggo.full_health, GameRunner.doggo.current_health)
 
@@ -120,19 +121,18 @@ class GameRunner:
                 run = False
 
             if not GameRunner.game_is_paused():
+                if not PhysicsEngine.is_within_screen(GameRunner.doggo):
+                    run = False
+
                 GameRenderer.render_players_and_platforms(GameRunner.platforms, GameRunner.doggo, whip)
                 GameRenderer.render_enemies(GameRunner.enemies, GameRunner.platforms, GameRunner.doggo)
                 GameRenderer.interactions_runner(GameRunner.doggo, whip, GameRunner.enemies)
                 GameRenderer.last_character_bottom = GameRunner.doggo.y_coordinate
                 player_x_coordinates.append(GameRunner.doggo.x_coordinate)
                 GameRenderer.last_player_x_coordinate = GameRunner.doggo.x_coordinate
-
-            if not PhysicsEngine.is_within_screen(GameRunner.doggo):
-                run = False
-
             # The draw and update are here so the game doesn't make them disappear,
             # so put draw functions here or both!
-            ScoreKeeper.give_score(GameRunner.doggo, GameRunner.game_is_paused())
+            ScoreKeeper.give_score(GameRunner.doggo)
             GameRenderer.draw_everything(GameRunner.doggo, GameRunner.enemies, GameRunner.platforms)
             # WallOfDeath.move()
             InteractionsFinder.player_wall_of_death_interactions(GameRunner.doggo)

@@ -26,7 +26,7 @@ class Item:
 
 class Whip(Item):
     whip_is_extending = False
-    secs_needed_to_extend = 2
+    secs_needed_to_extend = 0.15
     secs_extended = 0
     velocity = VelocityCalculator.give_velocity(screen_width, 336)
     up_length = VelocityCalculator.give_measurement(screen_height, 14)

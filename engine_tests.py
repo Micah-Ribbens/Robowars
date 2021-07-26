@@ -29,20 +29,17 @@ class TestEngines(unittest.TestCase):
         enemy.y_coordinate = 400
         # Movement speed is 0.08
         enemy.x_coordinate = 100.07
-        # self.assertEquals(False, CollisionsFinder.enemy_on_platform(
-        #     platform, enemy), "Shouldn't be on platform since enemy movement speed puts it off the platform beginning")
+        self.assertEquals(False, CollisionsFinder.enemy_on_platform(
+            platform, enemy), "Shouldn't be on platform since enemy movement speed puts it off the platform beginning")
 
-        # enemy.x_coordinate = platform.x_coordinate + platform.length + enemy.width - .01
-        # self.assertEquals(False, CollisionsFinder.enemy_on_platform(platform, enemy), f"Shouldn't be on platform since enemy at {enemy.x_coordinate + enemy.width} movement"
-        #                   + f"{enemy.velocity} speed puts it off the platform edge {platform.length + platform.x_coordinate}")
+        enemy.x_coordinate = platform.x_coordinate + platform.length + enemy.width - .01
+        self.assertEquals(False, CollisionsFinder.enemy_on_platform(platform, enemy), f"Shouldn't be on platform since enemy at {enemy.x_coordinate + enemy.width} movement"
+                          + f"{enemy.velocity} speed puts it off the platform edge {platform.length + platform.x_coordinate}")
 
         enemy.x_coordinate = platform.x_coordinate + \
             platform.length - enemy.velocity * 1.2 - enemy.width
         self.assertEquals(True, CollisionsFinder.enemy_on_platform(platform, enemy), f"Enemy at {enemy.x_coordinate} is within the platforms coordinates of" +
                           f"({platform.x_coordinate}, {platform.x_coordinate + platform.length})")
-        
-        enemy.x_coordinate = platform.x_coordinate - .1
-        self.assertEquals(False, CollisionsFinder.enemy_on_platform(platform, enemy), f"Enemy at {enemy.x_coordinate} is less than the platform at {platform.x_coordinate}")
 
     def test_on_platform(self):
         # x is 100 and y is 400

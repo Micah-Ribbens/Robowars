@@ -11,7 +11,7 @@ pygame.init()
 
 class HUD:
     y_coordinate = VelocityCalculator.give_measurement(screen_height, 1)
-    x_coordinate_1 = screen_width - VelocityCalculator.give_measurement(screen_width, 4)
+    x_coordinate_1 = VelocityCalculator.give_measurement(screen_width, 4)
     x_coordinate_2 = x_coordinate_1 + VelocityCalculator.give_measurement(screen_width, 2)
     width = VelocityCalculator.give_measurement(screen_width, .7)
     height = VelocityCalculator.give_measurement(screen_height, 5)
@@ -22,6 +22,9 @@ class HUD:
     def render_pause_button(is_paused):
         if is_paused:
             HUD.show_pause_screen()
+
+        else:
+            pass
 
         pygame.draw.rect(win, (HUD.color), (HUD.x_coordinate_1,
                          HUD.y_coordinate, HUD.width, HUD.height))
@@ -36,7 +39,6 @@ class HUD:
         clicked = pygame.mouse.get_pressed()[0]
 
         if area.collidepoint(mouse_x, mouse_y) and clicked:
-            # print("CLICKEEEEEEEED")
             return True
 
         return False
