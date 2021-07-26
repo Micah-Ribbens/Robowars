@@ -2,11 +2,13 @@ from important_variables import (
     screen_height,
     screen_width,
     win,
-    consistency_keeper
+    y_velocities
+    # consistency_keeper
 )
 import pygame
 from time import time
 import math
+from velocity_calculator import VelocityCalculator
 
 class Player:
     is_facing_right = True
@@ -15,10 +17,10 @@ class Player:
     player_color = (250, 0, 0)
     x_coordinate = 100
     y_coordinate = screen_height - 200
-    width = screen_width * .05
-    height = screen_height * .15
-    movement = screen_width * 0.0004
-    movement_down = screen_height * .002
+    width = VelocityCalculator.give_measurement(screen_width, 5)
+    height = VelocityCalculator.give_measurement(screen_height, 15)
+    running_velocity = VelocityCalculator.give_velocity(screen_width, 448)
+    downwards_velocity = VelocityCalculator.give_velocity(screen_height, 1121)
     jumped = 0
     can_move_down = True
     on_platform = False
@@ -27,8 +29,8 @@ class Player:
     move_right = False
     can_jump = True
     is_jumping = False
-    jump_height = screen_height * .002
-    max_jump_height = screen_height * .4
+    upwards_velocity = y_velocities
+    max_jump_height = VelocityCalculator.give_measurement(screen_height, 40)
     jump_key_held_down = False
     throw_whip = False
     space_held_in = False
@@ -36,18 +38,15 @@ class Player:
     stay_up_in_air = False
     stationary_air_time = 0
 
-    def _improve_variables(self):
-        # print(self.jump_height)
-        self.movement = screen_width * (
-            consistency_keeper.calculate_new_speed(0.0004))
+    # def _improve_variables(self):
+    #     self.movement = screen_width * (
+    #         consistency_keeper.calculate_new_speed(0.0004))
 
-        self.movement_down = screen_height * (
-            consistency_keeper.calculate_new_speed(.002))
+    #     self.movement_down = screen_height * (
+    #         consistency_keeper.calculate_new_speed(.002))
 
-        self.jump_height = screen_height * (
-            consistency_keeper.calculate_new_speed(.002))
-        # print(consistency_keeper.calculate_new_speed(1))
-        # print(self.jump_height)
+    #     self.jump_height = screen_height * (
+    #         consistency_keeper.calculate_new_speed(.002))
 
     def draw(self):
         pygame.draw.rect(win, (self.player_color), (self.x_coordinate,
@@ -61,7 +60,7 @@ class Player:
 
     def movements(self):
         controlls = pygame.key.get_pressed()
-        self._improve_variables()
+        # self._improve_variables()
         if self.jump_key_held_down and self.on_platform:
             self.can_jump = False
 
@@ -77,13 +76,13 @@ class Player:
             self.move_right = True
 
         elif move_right_possible:
-            self.x_coordinate += self.movement
+            self.x_coordinate += VelocityCalculator.calc_distance(self.running_velocity)
 
         else:
             self.move_right = False
 
         if controlls[pygame.K_LEFT] and self.can_move_left:
-            self.x_coordinate -= self.movement
+            self.x_coordinate -= VelocityCalculator.calc_distance(self.running_velocity)
             self.is_facing_right = False
 
         if controlls[pygame.K_UP]:
@@ -103,7 +102,7 @@ class Player:
             self.apex()
 
         if controlls[pygame.K_DOWN] and self.can_move_down:
-            self.y_coordinate += self.movement_down
+            self.y_coordinate += VelocityCalculator.calc_distance(self.downwards_velocity)
 
         if controlls[pygame.K_SPACE] and not self.space_held_in:
             self.throw_whip = True
@@ -123,16 +122,17 @@ class Player:
             self.stationary_air_time = 0
 
         else:
-            self.stationary_air_time += consistency_keeper.current_speed
+            self.stationary_air_time += VelocityCalculator.time
 
     def jump(self):
+        # print("JUMPED CALLED")
         if self.on_platform:
-            self.jumped = 0 + self.jump_height
+            self.jumped = 0 + VelocityCalculator.calc_distance(self.upwards_velocity)
             self.is_jumping = True
 
         if self.jumped <= self.max_jump_height and self.is_jumping:
-            self.y_coordinate -= self.jump_height
-            self.jumped += self.jump_height
+            self.y_coordinate -= VelocityCalculator.calc_distance(self.upwards_velocity)
+            self.jumped += VelocityCalculator.calc_distance(self.upwards_velocity)
 
         if self.jumped >= self.max_jump_height:
             self.can_jump = False
@@ -140,18 +140,19 @@ class Player:
     def controls(self):
         self.movements()
     
-    def max_jump_time(self, new_platform_y_coordinate, last_platform_y_coordinate, gravity):
+    def max_time_in_air(self, new_platform_y_coordinate, last_platform_y_coordinate, gravity):
         upwards_time = 0
         max_y_coordinate = 0
-        # Top of screen is 0
-        if last_platform_y_coordinate - self.max_jump_height <= 0:
-            upwards_time = math.ceil((last_platform_y_coordinate - self.height) / self.jump_height)
+        # Checks if the player once jumping hits the top of the screen, which is at 0
+        if last_platform_y_coordinate - self.max_jump_height - self.height <= 0:
+            upwards_time = (last_platform_y_coordinate - self.height) / self.upwards_velocity
             max_y_coordinate = self.height
+            print("CALLED")
 
         else:
             max_y_coordinate = last_platform_y_coordinate - self.max_jump_height
-            upwards_time = math.ceil(self.max_jump_height / self.jump_height)
-        downwards_time = math.ceil((new_platform_y_coordinate - max_y_coordinate) / gravity)
+            upwards_time = self.max_jump_height / self.upwards_velocity
+        downwards_time = (new_platform_y_coordinate - max_y_coordinate) / gravity
 
         return upwards_time + downwards_time
 
