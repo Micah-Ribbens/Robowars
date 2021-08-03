@@ -3,7 +3,7 @@ class VelocityCalculator:
     time = 0
     def give_velocity(unit_of_measurement, how_many_units):
         """Units are in 1/1000 of the screen 
-            Screen_width and screen_width are encouraged to be used"""
+            screen_length and screen_height are encouraged to be used"""
         return (unit_of_measurement / 1000) * how_many_units
 
     def calc_distance(velocity):
@@ -13,5 +13,5 @@ class VelocityCalculator:
     # Bigger measurements since its used for widths and stuff like that
     def give_measurement(unit_of_measurement, how_many_units):
         """Units are in 1/100 of the screen 
-            Screen_width and screen_width are encouraged to be used"""
+            screen_length and screen_height are encouraged to be used"""
         return (unit_of_measurement / 100) * how_many_units
