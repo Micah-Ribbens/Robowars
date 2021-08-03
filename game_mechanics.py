@@ -1,13 +1,11 @@
+from UtilityClasses import SideScrollableComponents
+from enemies import SimpleEnemy
 import time
 from velocity_calculator import VelocityCalculator
 import pygame
-import time
-
-from pygame.sprite import LayeredUpdates
 from wall_of_death import WallOfDeath
 from important_variables import (
-    # consistency_keeper,
-    screen_width
+    screen_length
 )
 from engines import InteractionsFinder
 from items import (
@@ -39,19 +37,19 @@ class GameRunner:
     enemies = []
     platforms = [Platform()]
     doggo = Player()
-    # physics = PhysicsEngine()
     pause_is_held_down = False
     game_paused = False
     def reset_variables():
-        GameRunner.enemies = [None]
+        GameRunner.enemies = [SimpleEnemy()]
         GameRunner.platforms = [Platform()]
         GameRunner.doggo = Player()
-        GameRunner.doggo.y_coordinate = GameRunner.platforms[0].y_coordinate - GameRunner.doggo.height - 1
+        GameRunner.doggo.y_coordinate = GameRunner.platforms[0].y_coordinate - GameRunner.doggo.height - 100
         WallOfDeath.reset()
         ScoreKeeper.reset()
 
     def game_is_paused():
         pause_clicked = HUD.pause_clicked()
+        # TODO can_pause? Isn't this used to pause and unpause?
         can_pause = not GameRunner.pause_is_held_down and pause_clicked
 
         if pause_clicked:
@@ -60,96 +58,80 @@ class GameRunner:
         else:
             GameRunner.pause_is_held_down = False
         if can_pause:
-            print("CLICKED")
             GameRunner.game_paused = not GameRunner.game_paused
         return GameRunner.game_paused
 
-
+    def add_sidescroll_components():
+        SideScrollableComponents.components = []
+        # SideScrollableComponents.components.append(for enemy in)
+        for x in range(len(GameRunner.enemies)):
+            SideScrollableComponents.components.append(GameRunner.enemies[x])
+            SideScrollableComponents.components.append(GameRunner.platforms[x])
     def generate_needed_objects():
         for x in range(len(GameRunner.platforms)):
             platform = GameRunner.platforms[x]
-            if platform == None:
+            # TODO how can a platform == None; change to is None
+            if not platform.is_within_screen:
                 continue
-            platform_end = platform.x_coordinate + platform.length
-            if platform_end <= 0:
-                GameRunner.platforms = GameRunner.platforms[:x] + [None] + GameRunner.platforms[x + 1:]
-                GameRunner.enemies = GameRunner.enemies[:x] + [None] + GameRunner.enemies[x + 1:]
-                # GameRenderer.last_enemy_x_coordiantes.append(0)
-
-        for x in range(len(GameRunner.enemies)):
-            enemy = GameRunner.enemies[x]
-            if enemy == None:
-                continue
-            if enemy.current_health <= 0:
-                GameRunner.enemies = GameRunner.enemies[:x] + [None] + GameRunner.enemies[x + 1:]
+            # TODO explain what this does maybe make a seperate function
+            if platform.right_edge <= 0:
+                GameRunner.platforms[x].is_within_screen = False
+                GameRunner.enemies[x].is_within_screen = False
                 
         while True:
             last_platform = GameRunner.platforms[len(GameRunner.platforms) - 1]
             last_platform_end = last_platform.x_coordinate + last_platform.length
-            if last_platform_end > screen_width:
+            # TODO why does this work?
+            if last_platform_end > screen_length:
                 return
             GameRunner.platforms = Generator.generate_platform(GameRunner.platforms, GameRunner.doggo, PhysicsEngine.gravity_pull)
-            last_platform = GameRunner.platforms[len(GameRunner.platforms) - 1]
+            # TODO why does it need the last platform?
+            platforms_length = len(GameRunner.platforms) - 1
+            last_platform = GameRunner.platforms[platforms_length]
             last_platform_end = last_platform.x_coordinate + last_platform.length
             GameRunner.enemies = Generator.generate_enemy(last_platform, GameRunner.enemies)
-            GameRenderer.last_enemy_x_coordiantes.append(0)
-
-        
-
 
     def run_game():
-        player_x_coordinates = []
         run = True
-        whip = Whip()
-        game_paused = False 
         ScoreKeeper.set_player(GameRunner.doggo)
         GameRunner.reset_variables()
         while run:
+            GameRunner.add_sidescroll_components()
+            # TODO explain why start_time and end_time are needed
             start_time = time.time()
             GameRunner.generate_needed_objects()
+            # TODO explain what this does
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-
+            # TODO explain why this has to be here
             win.fill(background)
             HUD.render_pause_button(GameRunner.game_is_paused())
 
             HUD.show_character_health(GameRunner.doggo.full_health, GameRunner.doggo.current_health)
 
-            if GameRunner.doggo.is_dead():
+            if GameRunner.doggo.current_health == 0:
+                print("HEALTH GONE")
                 run = False
-
+            # Draw Everything has to be here so it can populate history keeper allowing the engines to see the last_platform object
+            GameRenderer.draw_everything(GameRunner.doggo, GameRunner.enemies, GameRunner.platforms)
+            ScoreKeeper.give_score(GameRunner.doggo, GameRunner.game_is_paused())
+            WallOfDeath.draw()
             if not GameRunner.game_is_paused():
-                GameRenderer.render_players_and_platforms(GameRunner.platforms, GameRunner.doggo, whip)
-                GameRenderer.render_enemies(GameRunner.enemies, GameRunner.platforms, GameRunner.doggo)
-                GameRenderer.interactions_runner(GameRunner.doggo, whip, GameRunner.enemies)
-                GameRenderer.last_character_bottom = GameRunner.doggo.y_coordinate
-                player_x_coordinates.append(GameRunner.doggo.x_coordinate)
-                GameRenderer.last_player_x_coordinate = GameRunner.doggo.x_coordinate
+                GameRenderer.render_players_and_platforms(GameRunner.platforms, GameRunner.doggo)
+                GameRenderer.render_enemies(GameRunner.enemies, GameRunner.platforms)
+                GameRenderer.interactions_runner(GameRunner.doggo, GameRunner.doggo.item, GameRunner.enemies)
 
             if not PhysicsEngine.is_within_screen(GameRunner.doggo):
                 run = False
-
-            # The draw and update are here so the game doesn't make them disappear,
-            # so put draw functions here or both!
-            ScoreKeeper.give_score(GameRunner.doggo, GameRunner.game_is_paused())
-            GameRenderer.draw_everything(GameRunner.doggo, GameRunner.enemies, GameRunner.platforms)
-            # WallOfDeath.move()
-            InteractionsFinder.player_wall_of_death_interactions(GameRunner.doggo)
-            WallOfDeath.draw()
+                
 
             pygame.display.update()
             end_time = time.time()
             time_taken = end_time - start_time
+            # Why is this needed?
             if time_taken > 0:
                 VelocityCalculator.time = time_taken
         GameRunner.reset_variables()
+        print("RESET GAME")
         GameRunner.run_game()
-
-
-def average(numbers):
-    total = 0
-    for number in numbers:
-        total += number
-
-    return total / len(numbers)
