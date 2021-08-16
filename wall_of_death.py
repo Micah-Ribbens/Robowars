@@ -1,6 +1,6 @@
 import pygame
 from important_variables import (
-    win,
+    window,
     screen_height,
     screen_length, 
     # consistency_keeper
@@ -16,7 +16,7 @@ class WallOfDeath:
     # def _improve_variables():
     #     WallOfDeath.movement = consistency_keeper.calculate_new_speed(WallOfDeath.movement)
     def draw():
-        pygame.draw.rect(win, (WallOfDeath.color), (WallOfDeath.x_coordinate,
+        pygame.draw.rect(window, (WallOfDeath.color), (WallOfDeath.x_coordinate,
                                 WallOfDeath.y_coordinate, WallOfDeath.length, WallOfDeath.height))
     def move():
         WallOfDeath.x_coordinate += VelocityCalculator.give_velocity(screen_length, 224)

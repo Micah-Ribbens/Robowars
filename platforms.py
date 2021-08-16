@@ -2,7 +2,7 @@ from UtilityClasses import GameObject
 from important_variables import (
     screen_height,
     screen_length,
-    win
+    window
 )
 from velocity_calculator import VelocityCalculator
 import pygame

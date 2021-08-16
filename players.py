@@ -2,7 +2,7 @@ from UtilityClasses import GameCharacters, SideScrollableComponents
 from important_variables import (
     screen_height,
     screen_length,
-    win,
+    window,
     y_velocities
     # consistency_keeper
 )
@@ -12,13 +12,14 @@ import pygame
 from time import time
 import math
 from velocity_calculator import VelocityCalculator
+from history_keeper import HistoryKeeper
 # TODO create class to clean up attributes
 class Player(GameCharacters):
     item = None
     running_velocity = VelocityCalculator.give_velocity(screen_length, 448)
     downwards_velocity = VelocityCalculator.give_velocity(screen_height, 1121)
-    jumped = 0
-    last_movement_direction = ""
+    amount_jumped = 0
+    is_facing_right = False
     can_move_down = True
     on_platform = False
     can_move_left = True
@@ -32,7 +33,7 @@ class Player(GameCharacters):
     # So player hangs a bit in air when reaches max jump height
     stay_up_in_air = False
     stationary_air_time = 0
-    game_is_sidecrolling = False
+    game_is_sidescrolling = False
         
     def __init__(self):
         self.item = Whip(self)
@@ -43,92 +44,103 @@ class Player(GameCharacters):
         self.y_coordinate = screen_height - 200
         self.length = VelocityCalculator.give_measurement(screen_length, 5)
         self.height = VelocityCalculator.give_measurement(screen_height, 15)
+
+    # I.E. if the player holds in the up key and landsThe player would jump again, so this function 
+    # tells if that is going to happen and if it is it allows the caller of function to prevent it
+    def is_continuous_event(self, event, event_name):
+        HistoryKeeper.add(event, event_name)
+        if HistoryKeeper.get_last(event_name) and event:
+            return True
+        return False
+
+    def is_height_for_apex(self):
+        return self.amount_jumped >= self.max_jump_height
+
+    # For all functions that have movement syntax is "do" = always does it,
+    # Otherwise logic inside function to figure out if that movement should be done
+    def rightwards_movement(self, right_key_is_held_down):
+        if not right_key_is_held_down or not self.can_move_right:
+            self.game_is_sidescrolling = False
+            return
+
+        self.is_facing_right = True
+        location_to_sidescroll = VelocityCalculator.give_measurement(screen_length, 20)
+        self.game_is_sidescrolling = self.x_coordinate >= location_to_sidescroll
+
+        if self.x_coordinate >= location_to_sidescroll:
+            SideScrollableComponents.side_scroll_all(VelocityCalculator.calc_distance(self.running_velocity))
+
+        else:
+            self.x_coordinate += VelocityCalculator.calc_distance(self.running_velocity)
+
+    def upwards_movement(self, jump_key_held_down):
+        if self.on_platform:
+            # Makes sure doesn't keep jumping up and down
+            self.can_jump = not self.is_continuous_event(jump_key_held_down, "jump")
+                                        
+        # If the player is jumping and the jump_key isn't held down,
+        # The player has to be in the apex
+        jump_key_was_released = self.is_jumping and not jump_key_held_down
+        if self.is_height_for_apex() or jump_key_was_released or self.stationary_air_time > 0:
+            self.can_jump = False
+            self.do_apex()
+
+        # If the player is at the apex, the player shouldn't be able to jump
+        elif self.can_jump and jump_key_held_down:
+            self.do_jump()
+
     def movement(self):
         controlls = pygame.key.get_pressed()
-        # TODO why use this logic?
-        if self.jump_key_held_down and self.on_platform:
-            self.can_jump = False
-
-        elif self.on_platform:
-            self.can_jump = True
-        # TODO possible this is used to move left
-        player_moving_right = controlls[pygame.K_RIGHT] and self.can_move_right
-            
-        # TODO why screen_length * .2?
-        player_location_to_start_sidescrolling = VelocityCalculator.give_measurement(screen_length, 20)
-        if not player_moving_right or self.x_coordinate < player_location_to_start_sidescrolling:\
-            self.game_is_sidecrolling = False
-        if player_moving_right:
-            self.last_movement_direction = "right"
-        if player_moving_right and self.x_coordinate >= player_location_to_start_sidescrolling:
-            SideScrollableComponents.side_scroll_all(VelocityCalculator.calc_distance(self.running_velocity))
-            self.game_is_sidecrolling = True
-
-        elif player_moving_right:
-            self.x_coordinate += VelocityCalculator.calc_distance(self.running_velocity)
+        self.rightwards_movement(controlls[pygame.K_RIGHT])
+        self.upwards_movement(controlls[pygame.K_UP])
 
         if controlls[pygame.K_LEFT] and self.can_move_left:
             self.x_coordinate -= VelocityCalculator.calc_distance(self.running_velocity)
-            self.last_movement_direction = "left"
-
-        if controlls[pygame.K_UP]:
-            self.jump_key_held_down = True
-
-        else: 
-            self.jump_key_held_down = False
-        # TODO what is this doing?
-        if self.is_jumping and not self.can_jump:
-            self.stay_up_in_air = True
-        
-        elif self.can_jump and self.jump_key_held_down:
-            self.jump()
-        # TODO explain logic inside if statement
-        if self.stay_up_in_air or (self.is_jumping and not self.jump_key_held_down):
-            # print("DO A APEX")
-            self.apex()
+            self.is_facing_right = False
 
         if controlls[pygame.K_DOWN] and self.can_move_down:
             self.y_coordinate += VelocityCalculator.calc_distance(self.downwards_velocity)
 
-        if controlls[pygame.K_SPACE] and not self.space_held_in:
-            self.item.use_item()
-            self.space_held_in = True
+        use_item_key = pygame.K_SPACE
+        if (not self.is_continuous_event(controlls[use_item_key], "use_item")
+                and controlls[use_item_key]):
 
-        if not controlls[pygame.K_SPACE]:
-            self.space_held_in = False
-    def apex(self):
+            self.item.use_item()
+
+    def do_apex(self):
         stationary_time_needed = .1
         if self.stationary_air_time >= stationary_time_needed:
             self.is_jumping = False
-            self.stay_up_in_air = False
             self.stationary_air_time = 0
+            self.amount_jumped = 0
 
         else:
             self.stationary_air_time += VelocityCalculator.time
 
-    def jump(self):
-        if self.on_platform:
-            self.jumped = 0 + VelocityCalculator.calc_distance(self.upwards_velocity)
-            self.is_jumping = True
+    def do_jump(self):
+        self.y_coordinate -= VelocityCalculator.calc_distance(self.upwards_velocity)
+        self.amount_jumped += VelocityCalculator.calc_distance(self.upwards_velocity)
+        self.is_jumping = True
+        # if self.on_platform:
+        #     self.amount_jumped = 0 + VelocityCalculator.calc_distance(self.upwards_velocity)
 
-        if self.jumped <= self.max_jump_height and self.is_jumping:
-            self.y_coordinate -= VelocityCalculator.calc_distance(self.upwards_velocity)
-            self.jumped += VelocityCalculator.calc_distance(self.upwards_velocity)
+        # elif self.is_jumping:
 
-        if self.jumped >= self.max_jump_height:
-            self.can_jump = False
     # TODO why max should be be time_in_air from jumping from one platform to the next
-    def max_time_in_air(self, new_platform_y_coordinate, last_platform_y_coordinate, gravity):
+    def time_in_air(self, new_platform_y_coordinate, last_platform_y_coordinate, gravity):
         upwards_time = 0
         max_y_coordinate = 0
-        # TODO break up logic
-        # Checks if the player once jumping hits the top of the screen, which is at 0
-        if last_platform_y_coordinate - self.max_jump_height - self.height <= 0:
+        # The players bottom is on the platform meaning once jumping the height has to be accounted
+        # For since the top of player is the bottom - height
+        jumping_change_in_y = self.max_jump_height - self.height
+        if last_platform_y_coordinate - jumping_change_in_y <= 0:
             upwards_time = (last_platform_y_coordinate - self.height) / self.upwards_velocity
             max_y_coordinate = self.height
+
         else:
             max_y_coordinate = last_platform_y_coordinate - self.max_jump_height
             upwards_time = self.max_jump_height / self.upwards_velocity
+
         downwards_time = (new_platform_y_coordinate - max_y_coordinate) / gravity
 
         return upwards_time + downwards_time
