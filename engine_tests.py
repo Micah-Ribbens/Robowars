@@ -1,10 +1,11 @@
+from history_keeper import HistoryKeeper
 from items import Whip
 import unittest
-from engines import CollisionsFinder, InteractionsFinder
+from engines import CollisionsFinder, InteractionEngine
 from platforms import Platform
 from players import Player
 from enemies import SimpleEnemy
-# TODO explain the why of the coordinate
+
 class TestEngines(unittest.TestCase):
     def get_test_players(self, number):
         """Number 1 is player that equals platform coordinates 2 is changed x coordinate
@@ -22,39 +23,18 @@ class TestEngines(unittest.TestCase):
             player.y_coordinate = platform.y_coordinate - platform.height - 1
             return player
 
-    def test_enemy_on_platform(self):
-        platform = Platform()
-        enemy = SimpleEnemy()
-        enemy.y_coordinate = 400
-        enemy.x_coordinate = 100.00
-        # TODO add a comment to explain what on earth this does or break up logic super confusing
-        enemy.x_coordinate = platform.x_coordinate + \
-            platform.length - enemy.velocity * 1.2 - enemy.height
-        self.assertEquals(True, CollisionsFinder.enemy_on_platform(platform, enemy), f"Enemy at {enemy.x_coordinate} is within the platforms coordinates of" +
-                          f"({platform.x_coordinate}, {platform.x_coordinate + platform.length})")
-
-        enemy.x_coordinate = platform.x_coordinate - .1
-        self.assertEquals(False, CollisionsFinder.enemy_on_platform(platform, enemy), f"Enemy at {enemy.x_coordinate} is less than the platform at {platform.x_coordinate}")
-
     def test_on_platform(self):
-        # x is 100 and y is 400
         platform = Platform()
         player = Player()
-        # Player bottom is 400 and x is 100
         player.y_coordinate = 400 - player.height
+        player.x_coordinate = platform.x_coordinate
+
         self.assertEquals(True, CollisionsFinder.on_platform(
             platform, player, 399), "Want true since player on platform")
 
-        self.assertEquals(False, CollisionsFinder.on_platform(platform, player, 401),
-                          f"Want false since last player bottom: 400 not less than platform x coordinate {platform.y_coordinate}")
-
-        player.y_coordinate = 399 - player.height
-        self.assertEquals(False, CollisionsFinder.on_platform(platform, player, 389),
-                          f"Want false since player at ({player.x_coordinate},{player.y_coordinate}) and platform at ({platform.x_coordinate}, {platform.y_coordinate}) and last player bottom not less than platform x cooordinate")
-
-        player.x_coordinate = platform.x_coordinate - 1 - player.height
-        player.y_coordinate = 400 - player.height
-        self.assertEquals(False, CollisionsFinder.on_platform(platform, player, 399),
+        player.x_coordinate = platform.x_coordinate - 1
+        player.y_coordinate = 400 - player.height - 1
+        self.assertEquals(False, CollisionsFinder.on_platform(platform, player, False),
                           f"Want false since player at ({player.x_coordinate},{player.y_coordinate}) and platform at ({platform.x_coordinate}, {platform.y_coordinate})")
 
     def test_platform_collision(self):
@@ -96,7 +76,7 @@ class TestEngines(unittest.TestCase):
         enemy.x_coordinate = whip.x_coordinate
         last_enemy_x_coordinate = enemy.x_coordinate
         enemy.y_coordinate = whip.y_coordinate
-        InteractionsFinder.enemy_whip_interactions(enemy, whip)
+        InteractionEngine.enemy_whip_interactions(enemy, whip)
         self.assertTrue(enemy.x_coordinate > last_enemy_x_coordinate,
                         f"Should have knocked enemy at ({enemy.x_coordinate + enemy.height} {last_enemy_x_coordinate}, {enemy.y_coordinate})right since whip is facing right whip being at x {whip.x_coordinate} length {whip.length + whip.x_coordinate}")
 
@@ -105,36 +85,15 @@ class TestEngines(unittest.TestCase):
         enemy.x_coordinate = whip.x_coordinate + whip.length / 1.2
 
         last_enemy_x_coordinate = enemy.x_coordinate
-        InteractionsFinder.enemy_whip_interactions(enemy, whip)
+        InteractionEngine.enemy_whip_interactions(enemy, whip)
         self.assertTrue(enemy.x_coordinate < last_enemy_x_coordinate,
                         f"Should have knocked enemy left since whip is facing left {enemy.x_coordinate}, {last_enemy_x_coordinate}")
 
         enemy.x_coordinate = whip.x_coordinate + 1
         last_enemy_x_coordinate = enemy.x_coordinate
-        InteractionsFinder.enemy_whip_interactions(enemy, whip)
+        InteractionEngine.enemy_whip_interactions(enemy, whip)
         self.assertTrue(last_enemy_x_coordinate == enemy.x_coordinate,
                         "Enemy should not have moved since not within whip x coordinate and height")
 
-    def test_player_enemy_interactions(self):
-        player = Player()
-        enemy = SimpleEnemy()
-        player.x_coordinate = enemy.x_coordinate + enemy.height - 2
-        player.y_coordinate = enemy.y_coordinate
-        last_player_x_coordinate = player.x_coordinate
-        prev_iteration_x_coordinate = enemy.x_coordinate - player.height - 1
-        prev_iteration_enemy_x_coordinate = enemy.x_coordinate + 1
-        InteractionsFinder.player_enemy_interactions(
-            player, enemy, prev_iteration_x_coordinate, prev_iteration_enemy_x_coordinate)
-        self.assertEquals(True, player.x_coordinate < last_player_x_coordinate, f"Should have knocked player left since player_x"
-                          + f" {player.x_coordinate} and enemy_x {enemy.x_coordinate} {prev_iteration_x_coordinate} {prev_iteration_enemy_x_coordinate} {player.x_coordinate}")
-
-        player.x_coordinate = enemy.x_coordinate + (enemy.height / 1.01)
-        last_player_x_coordinate = player.x_coordinate
-        prev_iteration_x_coordinate = enemy.x_coordinate + enemy.height + 1
-        prev_iteration_enemy_x_coordinate = enemy.x_coordinate - 2
-        InteractionsFinder.player_enemy_interactions(
-            player, enemy, prev_iteration_x_coordinate, prev_iteration_enemy_x_coordinate)
-        self.assertTrue(player.x_coordinate > last_player_x_coordinate, f"Should have knocked player right since player_x is " +
-                        f"{prev_iteration_x_coordinate} and enemy_x is {enemy.x_coordinate} {prev_iteration_x_coordinate} {player.x_coordinate}")
 
 unittest.main()

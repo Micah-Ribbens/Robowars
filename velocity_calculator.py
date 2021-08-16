@@ -9,7 +9,7 @@ class VelocityCalculator:
     def calc_distance(velocity):
         return VelocityCalculator.time * velocity
     
-    # Velcoities are in smaller measurements just because they happen alot, but this has 
+    # Velocities are in smaller measurements just because they happen alot, but this has 
     # Bigger measurements since its used for widths and stuff like that
     def give_measurement(unit_of_measurement, how_many_units):
         """Units are in 1/100 of the screen 
