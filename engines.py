@@ -41,7 +41,7 @@ class CollisionsFinder:
         if prev_object_iteration is None:
             return False
         object_sidescrolled = prev_object_iteration.x_coordinate > sidescrolling_object.x_coordinate
-        return prev_object_iteration.x_coordinate > sidescrolling_object.x_coordinate and object_sidescrolled
+        return CollisionsFinder.object_collision(unmoving_object, sidescrolling_object) and object_sidescrolled
 
     def is_side_collision(player, platform):
         # So the player doesn't land on the platform and also can't move
@@ -123,16 +123,6 @@ class InteractionEngine:
     def enemy_whip_interactions(enemy: SimpleEnemy, whip: Whip):
         if not whip.whip_is_extending:
             return
-        # whip_leftside_end = whip.x_coordinate + whip.length
-        # collision_left = whip.x_coordinate >= enemy.right_edge and whip_leftside_end <= enemy.right_edge
- 
-        # collision_right = (whip.x_coordinate <= enemy.x_coordinate
-        #                    and whip.right_edge >= enemy.x_coordinate)
-
-        # x_coordinate_collision = collision_left or collision_right
-
-        # y_coordinate_collision = (whip.bottom >= enemy.y_coordinate
-        #                           and whip.y_coordinate <= enemy.bottom)
         if not CollisionsFinder.object_collision(enemy, whip):
             return
         knockback_is_left = (enemy.x_coordinate <= whip.x_coordinate)

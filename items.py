@@ -11,7 +11,6 @@ class Item(GameObject):
     base_length = VelocityCalculator.give_measurement(screen_length, 2)
     
     def __init__(self):
-        self.color = (0, 250, 0)
         self.x_coordinate = 0
         self.y_coordinate = 0
         self.length = 0
@@ -32,6 +31,7 @@ class Whip(Item):
     player = None
 
     def __init__(self, player):
+        self.color = (77, 38, 0)
         self.player = player
 
     def use_item(self):

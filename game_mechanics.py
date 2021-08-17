@@ -1,12 +1,13 @@
 from history_keeper import HistoryKeeper
-from UtilityClasses import SideScrollableComponents
+from UtilityClasses import GameObject, SideScrollableComponents
 from enemies import SimpleEnemy
 import time
 from velocity_calculator import VelocityCalculator
 import pygame
 from wall_of_death import WallOfDeath
 from important_variables import (
-    screen_length
+    screen_length,
+    background
 )
 from engines import InteractionEngine
 from items import (
@@ -31,7 +32,6 @@ from score_keeper import ScoreKeeper
 
 nameOfGame = "robowars"
 pygame.display.set_caption(f'{nameOfGame}')
-background = (0, 0, 0)
 class GameRunner:
     enemies = []
     platforms = [Platform()]
@@ -40,7 +40,8 @@ class GameRunner:
     game_paused = False
     def reset_variables():
         enemy = SimpleEnemy()
-        enemy.is_within_screen = False
+        # TODO change back
+        # enemy.is_within_screen = False
         GameRunner.enemies = [enemy]
         GameRunner.platforms = [Platform()]
         GameRunner.doggo = Player()
@@ -65,7 +66,6 @@ class GameRunner:
 
     def add_sidescroll_components():
         SideScrollableComponents.components = []
-        # SideScrollableComponents.components.append(for enemy in)
         for x in range(len(GameRunner.enemies)):
             SideScrollableComponents.components.append(GameRunner.enemies[x])
             SideScrollableComponents.components.append(GameRunner.platforms[x])
@@ -73,10 +73,8 @@ class GameRunner:
     def delete_unneeded_objects():
         for x in range(len(GameRunner.platforms)):
             platform = GameRunner.platforms[x]
-            # TODO how can a platform == None; change to is None
             if not platform.is_within_screen:
                 continue
-            # TODO explain what this does maybe make a seperate function
             if platform.right_edge <= 0:
                 GameRunner.platforms[x].is_within_screen = False
                 GameRunner.enemies[x].is_within_screen = False
@@ -89,7 +87,6 @@ class GameRunner:
             if last_platform.right_edge > screen_length:
                 return
             GameRunner.platforms = Generator.generate_platform(GameRunner.platforms, GameRunner.doggo, PhysicsEngine.gravity_pull)
-            # TODO why does it need the last platform?
             last_platform = GameRunner.platforms[len(GameRunner.platforms) - 1]
             GameRunner.enemies = Generator.generate_enemy(last_platform, GameRunner.enemies)
 

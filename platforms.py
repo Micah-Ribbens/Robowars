@@ -1,4 +1,4 @@
-from UtilityClasses import GameObject
+from UtilityClasses import GameObject, Segment
 from important_variables import (
     screen_height,
     screen_length,
@@ -10,13 +10,20 @@ import pygame
 
 class Platform(GameObject):
     number = 0
-    
     def __init__(self):
-        self.color = (80, 21, 46)
+        self.color = (150, 75, 0)
         self.x_coordinate = 100
         self.height = 100
         self.y_coordinate = screen_height - self.height
         self.length = VelocityCalculator.give_measurement(screen_length, 50)
-
-    def move_left(self, change):
-        self.x_coordinate -= change
+    
+    def draw(self):
+        green_segment = Segment(
+            is_percentage=False,
+            color=(34, 204, 0),
+            amount_from_top=0,
+            amount_from_left=0,
+            length_amount=self.length,
+            width_amount=VelocityCalculator.give_measurement(screen_height, 4)
+        )
+        self.draw_in_segments([green_segment])

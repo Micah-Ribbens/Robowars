@@ -1,4 +1,4 @@
-from UtilityClasses import GameCharacters, SideScrollableComponents
+from UtilityClasses import GameCharacters, Segment, SideScrollableComponents
 from important_variables import (
     screen_height,
     screen_length,
@@ -44,6 +44,41 @@ class Player(GameCharacters):
         self.y_coordinate = screen_height - 200
         self.length = VelocityCalculator.give_measurement(screen_length, 5)
         self.height = VelocityCalculator.give_measurement(screen_height, 15)
+    
+    def draw(self):
+        eye_color = (0,0,255)
+        body_color = GameObject.light_gray
+        self.color = body_color
+        mouth_color = GameObject.red
+
+        eye1 = Segment(
+            is_percentage=True, 
+            color=eye_color, 
+            amount_from_top=20, 
+            amount_from_left=25, 
+            length_amount=20, 
+            width_amount=20)
+
+        eye2 = Segment(
+            is_percentage=True, 
+            color=eye_color, 
+            amount_from_top=eye1.amount_from_top, 
+            amount_from_left=eye1.right_edge + 10, 
+            length_amount=eye1.length_amount, 
+            width_amount=eye1.width_amount)
+
+        mouth = Segment(
+            is_percentage=True, 
+            color=mouth_color, 
+            amount_from_top=60, 
+            amount_from_left=10, 
+            length_amount=80, 
+            width_amount=10)
+
+        self.draw_in_segments([eye1, eye2, mouth])
+
+
+
 
     # I.E. if the player holds in the up key and landsThe player would jump again, so this function 
     # tells if that is going to happen and if it is it allows the caller of function to prevent it
