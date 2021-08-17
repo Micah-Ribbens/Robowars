@@ -1,29 +1,26 @@
-from UtilityClasses import GameCharacters
-import pygame
-
+from UtilityClasses import GameCharacters, Segment
 from important_variables import (
     screen_length,
+    screen_height
 )
 from velocity_calculator import (
     VelocityCalculator  
 )
-class Enemy(GameCharacters):
-    def __init__(self):
-        self.color = (25, 50, 25)
-        self.x_coordinate = 80
-        self.length = 40
-        self.height = 40
-        self.y_coordinate = 80
-        self.current_health = 20
-        self.full_health = 20
-
-class SimpleEnemy(Enemy):
+class SimpleEnemy(GameCharacters):
     velocity = VelocityCalculator.give_velocity(screen_length, 112)
     knockback_distance = VelocityCalculator.give_measurement(screen_length, 25)
     is_moving_left = True
     damage = 5
     is_on_platform = True
     platform_on = None
+    def __init__(self):
+        self.x_coordinate = 80
+        self.length = VelocityCalculator.give_measurement(screen_length, 5)
+        self.height = VelocityCalculator.give_measurement(screen_height, 15)
+        self.y_coordinate = 80
+        self.full_health = 20
+        self.current_health = 20
+        self.color = self.black
     def movement(self):
         self.change_direction_if_necessary()
         if not self.is_moving_left:
@@ -43,5 +40,16 @@ class SimpleEnemy(Enemy):
         else:
             self.is_moving_left = True
             self.x_coordinate = self.platform_on.right_edge - self.length
+    
+    def draw(self):
+        red_segment = Segment(
+            is_percentage=True,
+            color=(255, 42, 0),
+            amount_from_top=30,
+            amount_from_left=0,
+            length_amount=100,
+            width_amount=10
+        )
+        self.draw_in_segments([red_segment])
 
 
