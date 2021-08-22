@@ -39,11 +39,13 @@ class GameRunner:
     pause_is_held_down = False
     game_paused = False
     def reset_variables():
-        enemy = SimpleEnemy()
+        enemy = SimpleEnemy(GameRunner.doggo)
         # TODO change back
         # enemy.is_within_screen = False
         GameRunner.enemies = [enemy]
-        GameRunner.platforms = [Platform()]
+        platform = Platform()
+        enemy.platform_on = platform
+        GameRunner.platforms = [platform]
         GameRunner.doggo = Player()
         GameRunner.doggo.y_coordinate = GameRunner.platforms[0].y_coordinate - GameRunner.doggo.height - 100
         WallOfDeath.reset()
@@ -68,15 +70,19 @@ class GameRunner:
         SideScrollableComponents.components = []
         for x in range(len(GameRunner.enemies)):
             SideScrollableComponents.components.append(GameRunner.enemies[x])
+        for x in range(len(GameRunner.platforms)):
             SideScrollableComponents.components.append(GameRunner.platforms[x])
 
     def delete_unneeded_objects():
         for x in range(len(GameRunner.platforms)):
             platform = GameRunner.platforms[x]
-            if not platform.is_within_screen:
-                continue
             if platform.right_edge <= 0:
                 GameRunner.platforms[x].is_within_screen = False
+        for x in range(len(GameRunner.enemies)):
+            enemy = GameRunner.enemies[x]
+            if enemy.platform_on is None:
+                continue
+            if enemy.platform_on.right_edge <= 0:
                 GameRunner.enemies[x].is_within_screen = False
 
     def generate_needed_objects():
@@ -88,7 +94,7 @@ class GameRunner:
                 return
             GameRunner.platforms = Generator.generate_platform(GameRunner.platforms, GameRunner.doggo, PhysicsEngine.gravity_pull)
             last_platform = GameRunner.platforms[len(GameRunner.platforms) - 1]
-            GameRunner.enemies = Generator.generate_enemy(last_platform, GameRunner.enemies)
+            GameRunner.enemies = Generator.generate_enemy(last_platform, GameRunner.enemies, GameRunner.doggo)
 
     def run_game():
         run = True
