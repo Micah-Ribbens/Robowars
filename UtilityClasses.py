@@ -1,5 +1,7 @@
+import random
 from important_variables import window
 import pygame
+from history_keeper import HistoryKeeper
 from abc import abstractmethod
 from velocity_calculator import VelocityCalculator
 from important_variables import screen_height, screen_length, background
@@ -18,6 +20,7 @@ class Segment:
         self.is_percentage, self.color = kwargs.get("is_percentage"), kwargs.get("color"), 
         self.amount_from_top, self.amount_from_left = kwargs.get("amount_from_top"), kwargs.get("amount_from_left")
         self.length_amount, self.width_amount = kwargs.get("length_amount"), kwargs.get("width_amount")
+
     @property
     def right_edge(self):
         return self.amount_from_left + self.length_amount
@@ -86,6 +89,12 @@ class GameObject:
 class GameCharacters(GameObject):
     current_health = 0
     full_health = 0
+    is_flinching = False
+    time_spent_flinching = 0
+    is_invincible = False
+    invincibility__max_time = 0
+    total_invincibility_time = 0
+
     def knockback(self, damage=0, **kwargs):
         """One **kwargs should be direction_is_left"""
         UtilityFunctions.validate_kwargs_has_all_fields(["direction_is_left"], kwargs)
@@ -98,6 +107,42 @@ class GameCharacters(GameObject):
     def movement(self):
         pass
 
+    def flinch(self):
+        self.is_flinching = not self.time_based_activity_is_done("flinching", 
+                                                                 .2, False)
+        flinching_total_time = .2
+        self.is_invincible = True
+        if self.time_spent_flinching >= flinching_total_time:
+            self.is_flinching = False
+            self.time_spent_flinching = 0
+        else:
+            self.is_flinching = True
+            self.time_spent_flinching += VelocityCalculator.time
+
+    def do_invincibility(self):
+        self.is_invincible = not self.time_based_activity_is_done("invincibility", 
+                                                              self.invincibility__max_time, False)
+    
+    def time_based_activity_is_done(self, name, time_needed, restart_condition):
+        if restart_condition:
+            HistoryKeeper.add(0, name)
+            return False
+
+        if HistoryKeeper.get_last(name) is None:
+            HistoryKeeper.add(VelocityCalculator.time, name)
+
+        current_time = HistoryKeeper.get_last(name)
+        if current_time >= time_needed:
+            return True
+
+        else:
+            HistoryKeeper.add(current_time + VelocityCalculator.time, name)
+
+        return False
+
+
+        
+
 
 class SideScrollableComponents:
     components = []
@@ -108,12 +153,16 @@ class SideScrollableComponents:
 
 
 class UtilityFunctions:
+    def random_chance(numerator, denominator):
+        return random.randint(numerator, denominator) >= numerator
     def validate_kwargs_has_all_fields(kwargs_fields, kwargs):
         for field in kwargs_fields:
             if not kwargs.__contains__(field):
                 raise ValueError(f"Field {field} was not provided for kwargs")
     
     def draw_font(message, font, **kwargs):
+        """x_coordinate and y_coordinate or 
+        is_center_of_screen"""
         foreground = (255, 255, 255)
         text = font.render(message, True, foreground, background)
         text_rect = text.get_rect()

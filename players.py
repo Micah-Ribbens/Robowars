@@ -32,23 +32,22 @@ class Player(GameCharacters):
     space_held_in = False
     # So player hangs a bit in air when reaches max jump height
     stay_up_in_air = False
-    stationary_air_time = 0
+    apex_time = 0
     game_is_sidescrolling = False
         
     def __init__(self):
         self.item = Whip(self)
         self.current_health = 20
         self.full_health = 20
-        self.color = (250, 0, 0)
+        self.color = self.light_gray
         self.x_coordinate = 100
         self.y_coordinate = screen_height - 200
+        self.invincibility__max_time = .6
         self.length = VelocityCalculator.give_measurement(screen_length, 5)
         self.height = VelocityCalculator.give_measurement(screen_height, 15)
     
     def draw(self):
         eye_color = (0,0,255)
-        body_color = GameObject.light_gray
-        self.color = body_color
         mouth_color = GameObject.red
 
         eye1 = Segment(
@@ -116,7 +115,12 @@ class Player(GameCharacters):
         # If the player is jumping and the jump_key isn't held down,
         # The player has to be in the apex
         jump_key_was_released = self.is_jumping and not jump_key_held_down
-        if self.is_height_for_apex() or jump_key_was_released or self.stationary_air_time > 0:
+        last_player = HistoryKeeper.get_last("player")
+        # In the first iteration there is no last player, so this protects code from NoneType Error
+        if last_player is None:
+            pass
+
+        elif self.is_height_for_apex() or (last_player.can_jump and not self.can_jump) or self.apex_time > 0 or jump_key_was_released:
             self.can_jump = False
             self.do_apex()
 
@@ -125,6 +129,17 @@ class Player(GameCharacters):
             self.do_jump()
 
     def movement(self):
+        # If the character gets hit and thus is flinching the character shouldn't be able to move
+        if self.is_flinching:
+            self.item.stop_item_usage()
+            self.flinch()
+            return
+        if self.is_invincible:
+            self.do_invincibility()
+            self.color = self.white
+        else:
+            self.color = self.light_gray
+
         controlls = pygame.key.get_pressed()
         self.rightwards_movement(controlls[pygame.K_RIGHT])
         self.upwards_movement(controlls[pygame.K_UP])
@@ -143,14 +158,14 @@ class Player(GameCharacters):
             self.item.use_item()
 
     def do_apex(self):
-        stationary_time_needed = .1
-        if self.stationary_air_time >= stationary_time_needed:
+        apex_time_needed = .1
+        if self.apex_time >= apex_time_needed:
             self.is_jumping = False
-            self.stationary_air_time = 0
+            self.apex_time = 0
             self.amount_jumped = 0
 
         else:
-            self.stationary_air_time += VelocityCalculator.time
+            self.apex_time += VelocityCalculator.time
 
     def do_jump(self):
         self.y_coordinate -= VelocityCalculator.calc_distance(self.upwards_velocity)

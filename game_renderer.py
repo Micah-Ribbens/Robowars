@@ -1,3 +1,4 @@
+import pygame
 from UtilityClasses import UtilityFunctions
 from enemies import SimpleEnemy
 from engines import (
@@ -12,7 +13,8 @@ from players import Player
 
 
 class GameRenderer:
-    def _render_enemy(enemy: SimpleEnemy, platform):
+    def _render_enemy(enemy: SimpleEnemy):
+        platform = enemy.platform_on
         if not CollisionsFinder.on_platform(platform, enemy, False):
             PhysicsEngine.do_gravity(enemy)
         else:
@@ -24,19 +26,25 @@ class GameRenderer:
         for x in range(len(enemies)):
             if enemies[x].is_within_screen and enemies[x].current_health > 0:
                 # For each enemy in enemies it renders the enemy
-                GameRenderer._render_enemy(enemies[x], platforms[x])
+                GameRenderer._render_enemy(enemies[x])
 
     def draw_everything(player: Player, enemies, platforms, game_is_paused):
         player.draw()
         player.item.render()
-        for x in range(len(platforms)):
+        for x in range(len(enemies)):
             enemy = enemies[x]
-            # TODO how can enemy and platform be None?
+            enemy.name = f"enemy{x}"
+            HistoryKeeper.add(enemy, enemy.name)
             if enemy.is_within_screen and enemy.current_health > 0:
-                enemy.name = f"enemy{x}"
-                HistoryKeeper.add(enemy, enemy.name)
+                enemy.player = player
                 enemy.draw()
+                enemy.item.render()
                 HUD.show_enemy_health(enemy)
+
+            if HistoryKeeper.get_last(enemy.name).current_health > 0 and enemy.current_health <= 0:
+                UtilityFunctions.draw_font("+100", pygame.font.Font('freesansbold.ttf', 10), x_coordinate=enemy.x_coordinate, y_coordinate=enemy.y_coordinate)
+                ScoreKeeper.score += 100
+
 
         for x in range(len(platforms)):
             platform = platforms[x]
@@ -54,8 +62,10 @@ class GameRenderer:
         for x in range(len(enemies)):
             enemy = enemies[x]
             if enemy.is_within_screen and enemy.current_health > 0:
-                InteractionEngine.enemy_whip_interactions(enemy, whip)
+                InteractionEngine.object_whip_interactions(enemy, whip)
                 InteractionEngine.player_enemy_interactions(player, enemy)
+                InteractionEngine.object_whip_interactions(player, enemy.item)
+
     def platform_side_collisions(player, platform_collided_into, is_rightside_collision, is_leftside_collision):
         if platform_collided_into is None:
             return

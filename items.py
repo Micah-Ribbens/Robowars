@@ -20,12 +20,17 @@ class Item(GameObject):
     def use_item(self):
         pass
 
+    def stop_item_usage(self):
+        self.whip_is_extending = False
+        self.length = 0
+        self.height = 0
+
 
 class Whip(Item):
     whip_is_extending = False
     secs_needed_to_start_extending = .2
     secs_extended = 0
-    velocity = VelocityCalculator.give_velocity(screen_length, 336)
+    velocity = VelocityCalculator.give_velocity(screen_length, 670)
     up_length = VelocityCalculator.give_measurement(screen_height, 14)
     max_length = VelocityCalculator.give_measurement(screen_length, 8.75)
     player = None
@@ -63,6 +68,8 @@ class Whip(Item):
         self.y_coordinate = player_midpoint
         length_increase = VelocityCalculator.calc_distance(self.velocity)
         self.length += length_increase
+        # TODO change it not t player but game object or something since both player and enemy use it and change stuff
+        # Associated with that
         if self.player.is_facing_right:
             self.x_coordinate = self.player.right_edge
         else:

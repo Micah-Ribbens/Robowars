@@ -86,17 +86,24 @@ class Generator:
         platforms.append(new_platform)
         return platforms
 
-    def generate_enemy(platform: Platform, enemies):
-        if random.randint(1, 2) == 1:
-            enemy = SimpleEnemy()
-            enemy.current_health = 0
-            enemies.append(enemy)
+    def generate_enemy(platform: Platform, enemies, player):
+        if platform_is_terrain(platform):
+            for x in range(random.randint(3, 5)):
+                new_enemy = SimpleEnemy(player)
+                new_enemy.x_coordinate = (platform.x_coordinate + platform.right_edge) / 2 + (x * new_enemy.length * 3)
+                new_enemy.y_coordinate = platform.y_coordinate - new_enemy.height
+                new_enemy.platform_on = platform
+                enemies.append(new_enemy)
             return enemies
 
-        new_enemy = SimpleEnemy()
+        if random.randint(1, 6) == 1:
+            return enemies
+
+        new_enemy = SimpleEnemy(player)
         new_enemy.x_coordinate = platform.x_coordinate + (platform.length / 2)
 
         new_enemy.y_coordinate = platform.y_coordinate - new_enemy.height
+        new_enemy.platform_on = platform
 
         enemies.append(new_enemy)
 
