@@ -59,6 +59,12 @@ class GameObject:
     def draw(self):
         pygame.draw.rect(window, (self.color), (self.x_coordinate,
                         self.y_coordinate, self.length, self.height))
+    @property
+    def y_midpoint(self):
+        return self.y_coordinate + self.height * .5
+    @property
+    def x_midpoint(self):
+        return self.x_coordinate + self.length * .5
     def __str__(self):
         return f"x {self.x_coordinate} y {self.y_coordinate} height {self.height} length {self.length} right_edge {self.right_edge} bottom {self.bottom}"    
     # Equal signs used so the __init__ function is optional when creating an instance of the class
@@ -83,17 +89,40 @@ class GameObject:
                 length = segment.length_amount
                 GameObject.draw(GameObject(x_coordinate, y_coordinate, height, length, segment.color))
 
+    def time_based_activity_is_done(self, name, time_needed, restart_condition, start_condition=True):
+        if restart_condition:
+            HistoryKeeper.add(0, name)
+            return False
+        # if not start_condition:
+        #     return True
+
+        if HistoryKeeper.get_last(name) is None:
+            HistoryKeeper.add(VelocityCalculator.time, name)
+
+        current_time = HistoryKeeper.get_last(name)
+        if current_time >= time_needed:
+            HistoryKeeper.add(0, name)
+            return True
+
+        else:
+            HistoryKeeper.add(current_time + VelocityCalculator.time, name)
+
+        return False
+
+
 
 # TODO better name for something that encompasses all things that have some 
 # sort of movement and can be knocked back (probably just enemies and players)
 class GameCharacters(GameObject):
     current_health = 0
+    hit_during_item_cycle = False
     full_health = 0
     is_flinching = False
     time_spent_flinching = 0
     is_invincible = False
     invincibility__max_time = 0
     total_invincibility_time = 0
+    is_blocking = False
 
     def knockback(self, damage=0, **kwargs):
         """One **kwargs should be direction_is_left"""
@@ -106,40 +135,26 @@ class GameCharacters(GameObject):
     @abstractmethod
     def movement(self):
         pass
+    
+    def do_block(self):
+        self.is_blocking = not self.time_based_activity_is_done("blocking"+self.name, .2, False)
+        
 
     def flinch(self):
-        self.is_flinching = not self.time_based_activity_is_done("flinching", 
-                                                                 .2, False)
-        flinching_total_time = .2
-        self.is_invincible = True
-        if self.time_spent_flinching >= flinching_total_time:
-            self.is_flinching = False
-            self.time_spent_flinching = 0
-        else:
-            self.is_flinching = True
-            self.time_spent_flinching += VelocityCalculator.time
+        self.is_flinching = not self.time_based_activity_is_done("flinching"+self.name, 
+                                                                 .5, False)
+        # flinching_total_time = .2
+        # if self.time_spent_flinching >= flinching_total_time:
+        #     self.is_flinching = False
+        #     self.time_spent_flinching = 0
+        # else:
+        #     self.is_flinching = True
+        #     self.time_spent_flinching += VelocityCalculator.time
 
     def do_invincibility(self):
-        self.is_invincible = not self.time_based_activity_is_done("invincibility", 
+        self.is_invincible = not self.time_based_activity_is_done("invincibility"+self.name, 
                                                               self.invincibility__max_time, False)
     
-    def time_based_activity_is_done(self, name, time_needed, restart_condition):
-        if restart_condition:
-            HistoryKeeper.add(0, name)
-            return False
-
-        if HistoryKeeper.get_last(name) is None:
-            HistoryKeeper.add(VelocityCalculator.time, name)
-
-        current_time = HistoryKeeper.get_last(name)
-        if current_time >= time_needed:
-            return True
-
-        else:
-            HistoryKeeper.add(current_time + VelocityCalculator.time, name)
-
-        return False
-
 
         
 
@@ -154,7 +169,7 @@ class SideScrollableComponents:
 
 class UtilityFunctions:
     def random_chance(numerator, denominator):
-        return random.randint(numerator, denominator) >= numerator
+        return random.randint(numerator, denominator) == numerator
     def validate_kwargs_has_all_fields(kwargs_fields, kwargs):
         for field in kwargs_fields:
             if not kwargs.__contains__(field):
