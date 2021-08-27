@@ -6,7 +6,7 @@ from important_variables import (
     y_velocities
     # consistency_keeper
 )
-from items import Whip
+from items import Shield, Whip
 from engines import *
 import pygame
 from time import time
@@ -16,7 +16,7 @@ from history_keeper import HistoryKeeper
 # TODO create class to clean up attributes
 class Player(GameCharacters):
     item = None
-    running_velocity = VelocityCalculator.give_velocity(screen_length, 448)
+    running_velocity = VelocityCalculator.give_velocity(screen_length, 600)
     downwards_velocity = VelocityCalculator.give_velocity(screen_height, 1121)
     amount_jumped = 0
     is_facing_right = False
@@ -34,9 +34,14 @@ class Player(GameCharacters):
     stay_up_in_air = False
     apex_time = 0
     game_is_sidescrolling = False
+    shield = None
+    used_dodge = False
         
     def __init__(self):
         self.item = Whip(self)
+        self.shield = Shield(self)
+        self.item.damage = 10
+        self.shield.damage = 5
         self.current_health = 20
         self.full_health = 20
         self.color = self.light_gray
@@ -92,6 +97,13 @@ class Player(GameCharacters):
 
     # For all functions that have movement syntax is "do" = always does it,
     # Otherwise logic inside function to figure out if that movement should be done
+    def can_dodge(self):
+        if self.used_dodge:
+            if self.time_based_activity_is_done("dodge"+self.name, 2, False, self.used_dodge):
+                self.used_dodge = False
+                return True
+        if self.is_flinching:
+            return True
     def rightwards_movement(self, right_key_is_held_down):
         if not right_key_is_held_down or not self.can_move_right:
             self.game_is_sidescrolling = False
@@ -129,18 +141,34 @@ class Player(GameCharacters):
             self.do_jump()
 
     def movement(self):
+        controlls = pygame.key.get_pressed()
         # If the character gets hit and thus is flinching the character shouldn't be able to move
+        if self.is_blocking:
+            self.do_block()
+
+        if self.can_dodge() and controlls[pygame.K_DOWN]:
+            self.do_invincibility()
+            self.used_dodge = True
+
         if self.is_flinching:
             self.item.stop_item_usage()
             self.flinch()
-            return
+            self.color = (250, 0,0)
+        else:
+            self.color = self.light_gray
+
+        if self.hit_during_item_cycle:
+            self.is_invincible = True
+
         if self.is_invincible:
             self.do_invincibility()
             self.color = self.white
         else:
             self.color = self.light_gray
 
-        controlls = pygame.key.get_pressed()
+
+        if self.is_flinching:
+            return
         self.rightwards_movement(controlls[pygame.K_RIGHT])
         self.upwards_movement(controlls[pygame.K_UP])
 
@@ -148,14 +176,19 @@ class Player(GameCharacters):
             self.x_coordinate -= VelocityCalculator.calc_distance(self.running_velocity)
             self.is_facing_right = False
 
-        if controlls[pygame.K_DOWN] and self.can_move_down:
-            self.y_coordinate += VelocityCalculator.calc_distance(self.downwards_velocity)
+        # If using whip shield can't be used
+        if (controlls[pygame.K_DOWN] or self.shield.is_being_used) and not self.item.whip_is_extending:
+            self.shield.use_item()
+        
 
         use_item_key = pygame.K_SPACE
+        # If using shield can't use item
         if (not self.is_continuous_event(controlls[use_item_key], "use_item")
-                and controlls[use_item_key]):
+                and controlls[use_item_key] and not self.shield.is_being_used):
 
             self.item.use_item()
+        
+        # if self.c
 
     def do_apex(self):
         apex_time_needed = .1

@@ -131,13 +131,31 @@ class InteractionEngine:
         #     player.current_health -= 5
         #     player.flinch()
 
-    def object_whip_interactions(object, whip: Whip):
-        if not whip.whip_is_extending:
+    def object_whip_interactions(object, object_hitting):
+        if not object_hitting.item.whip_is_extending:
+            # As in if is thrown and hits the enemy it can't hit the enemy during that same hit
+            object_hitting.hit_during_item_cycle = False
             return
-        if not CollisionsFinder.object_collision(object, whip):
+
+        if not CollisionsFinder.object_collision(object, object_hitting.item):
             return
-        knockback_is_left = (object.x_coordinate <= whip.x_coordinate)
-        # object.knockback(10, direction_is_left=knockback_is_left)
-        if not object.is_invincible:
+
+        if object.shield.is_being_used and InteractionEngine.shield_is_right_direction(object, object_hitting):
+            object_hitting.flinch()
+            print("FLINCH")
+            object_hitting.current_health -= object.shield.damage
+            object.shield.caused_flinch = True
+            return
+
+        if not object.is_invincible and not object_hitting.hit_during_item_cycle:
             object.flinch()
-            object.current_health -= 10
+            object_hitting.hit_during_item_cycle = True
+            object.current_health -= object_hitting.item.damage
+    
+    def shield_is_right_direction(object_blocking, object_hitting):
+        if object_blocking.is_facing_right and object_hitting.x_coordinate >= object_blocking.right_edge:
+            return True
+        if not object_blocking.is_facing_right and object_hitting.right_edge <= object_blocking.x_coordinate:
+            return True
+        return False
+        
