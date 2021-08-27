@@ -1,14 +1,22 @@
-from UtilityClasses import GameObject
+from history_keeper import HistoryKeeper
+import pygame
+import os
+from UtilityClasses import GameCharacters, GameObject
+import math
 from velocity_calculator import VelocityCalculator
 from important_variables import (
     screen_height,
     screen_length,
+    window
 )
+# from players import Player
+# TODO USE Trigonometry for drawing the item
 from abc import abstractmethod
 
 class Item(GameObject):
-    base_height = VelocityCalculator.give_measurement(screen_height, 2)
-    base_length = VelocityCalculator.give_measurement(screen_length, 2)
+    base_height = int(VelocityCalculator.give_measurement(screen_height, 2))
+    base_length = int(VelocityCalculator.give_measurement(screen_length, 2))
+    damage = 0
     
     def __init__(self):
         self.x_coordinate = 0
@@ -28,12 +36,13 @@ class Item(GameObject):
 
 class Whip(Item):
     whip_is_extending = False
-    secs_needed_to_start_extending = .2
+    full_animation_time = .1
     secs_extended = 0
     velocity = VelocityCalculator.give_velocity(screen_length, 670)
     up_length = VelocityCalculator.give_measurement(screen_height, 14)
     max_length = VelocityCalculator.give_measurement(screen_length, 8.75)
     player = None
+    full_length = 70
 
     def __init__(self, player):
         self.color = (77, 38, 0)
@@ -58,8 +67,9 @@ class Whip(Item):
         # If whip isn't drawn then its length is 0, and when it is upwards it is base_height
         # Because its base_height is the height of the whip when extending meaning if it is facing
         # Upwards the length should be the whips extending height
+        secs_needed_to_start_extending = .05
         is_right_length = self.length == 0 or self.length == self.base_height
-        time_is_too_long = self.secs_extended > self.secs_needed_to_start_extending
+        time_is_too_long = self.secs_extended > secs_needed_to_start_extending
         return is_right_length and not time_is_too_long
 
     def draw_whip_extending(self):
@@ -78,6 +88,8 @@ class Whip(Item):
             self.x_coordinate = self.player.x_coordinate - self.length
 
     def render(self):
+        if not self.whip_is_extending:
+            return
         whip_is_too_long = self.length >= 70
 
         if whip_is_too_long:
@@ -97,3 +109,70 @@ class Whip(Item):
             self.draw_whip_extending()
 
         self.draw()
+
+class Sword(Item):
+    def get_degrees(self):
+        last_time = HistoryKeeper.get_last("whip drawing"+self.player.name)
+        return (last_time / self.full_animation_time) * 180
+    def get_radians(self):
+        return math.radians(self.get_degrees())
+    def draw(self):
+        pygame.draw.line(window, self.color, (self.player.right_edge, self.player.y_midpoint), (self.get_x(), self.get_y()), self.base_height)
+
+    def get_x(self):
+        # Frames
+        if self.get_degrees() >= 46 and self.get_degrees() <= 136:
+            return self.player.right_edge + self.full_length
+        return self.player.right_edge
+        # No Frames
+        whip_end = self.player.right_edge + self.full_length
+        if self.get_degrees() > 180:
+            return self.player.right_edge
+        if self.get_degrees() > 90:
+            return whip_end - math.sin(self.get_radians() - 90) * self.full_length
+        # print("X sin", math.sin(self.get_radians()), self.get_radians())
+        return self.player.right_edge + math.sin(self.get_radians()) * self.full_length
+
+    def get_y(self):
+        # Frames
+        if self.get_degrees() >= 46 and self.get_degrees() <= 136:
+            return self.player.y_midpoint
+        if self.get_degrees() >= 137 and self.get_degrees():
+            return self.player.y_midpoint + self.full_length
+        return self.player.y_midpoint - self.full_length
+        # No Frames
+        if self.get_degrees() > 90:
+            return self.player.y_midpoint + math.cos(self.get_radians() - 90) * self.full_length
+
+        return self.player.y_midpoint - math.cos(self.get_radians()) * self.full_length
+
+class Shield(Item):
+    player = None
+    is_being_used = False
+    caused_flinch = False
+    def __init__(self, player):
+        self.player = player
+
+    def draw(self):
+        self.length = 20
+        self.height = self.player.height
+        if self.player.is_facing_right:
+            self.x_coordinate = self.player.right_edge
+        else:
+            self.x_coordinate = self.player.x_coordinate - self.length
+        self.y_coordinate = self.player.y_coordinate
+        self.color = (0, 0, 250)
+        GameObject.draw(self)
+
+    def use_item(self):
+        was_being_used = self.is_being_used
+        self.is_being_used = not self.time_based_activity_is_done("shield"+self.player.name, .3, False)
+        if self.is_being_used:
+            self.draw()
+        if was_being_used and not self.is_being_used and not self.caused_flinch:
+            self.player.flinch()
+            
+    def stop_usage(self):
+        self.is_being_used = False
+
+        

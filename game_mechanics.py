@@ -112,7 +112,7 @@ class GameRunner:
             # Has to be above all the drawing because it paints the screen the color of the background
             window.fill(background)
 
-            if GameRunner.doggo.current_health == 0:
+            if GameRunner.doggo.current_health <= 0:
                 run = False
 
             # Draw Everything has to be here so it can populate history keeper allowing the engines to see the last_platform object
@@ -120,7 +120,7 @@ class GameRunner:
             if not GameRunner.game_is_paused():
                 GameRenderer.render_players_and_platforms(GameRunner.platforms, GameRunner.doggo)
                 GameRenderer.render_enemies(GameRunner.enemies, GameRunner.platforms)
-                GameRenderer.interaction_engine_runner(GameRunner.doggo, GameRunner.doggo.item, GameRunner.enemies)
+                GameRenderer.interaction_engine_runner(GameRunner.doggo, GameRunner.enemies)
 
             if PhysicsEngine.is_below_screen_bottom(GameRunner.doggo):
                 run = False

@@ -58,13 +58,13 @@ class GameRenderer:
         HUD.show_character_health(player)
         ScoreKeeper.give_score(player)
 
-    def interaction_engine_runner(player, whip, enemies):
+    def interaction_engine_runner(player, enemies):
         for x in range(len(enemies)):
             enemy = enemies[x]
             if enemy.is_within_screen and enemy.current_health > 0:
-                InteractionEngine.object_whip_interactions(enemy, whip)
+                InteractionEngine.object_whip_interactions(enemy, player)
                 InteractionEngine.player_enemy_interactions(player, enemy)
-                InteractionEngine.object_whip_interactions(player, enemy.item)
+                InteractionEngine.object_whip_interactions(player, enemy)
 
     def platform_side_collisions(player, platform_collided_into, is_rightside_collision, is_leftside_collision):
         if platform_collided_into is None:

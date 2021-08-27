@@ -1,6 +1,7 @@
+from history_keeper import HistoryKeeper
 from random import random
 from engines import CollisionsFinder
-from items import Whip
+from items import Shield, Whip
 from UtilityClasses import GameCharacters, Segment, UtilityFunctions
 from important_variables import (
     screen_length,
@@ -10,7 +11,7 @@ from velocity_calculator import (
     VelocityCalculator  
 )
 class SimpleEnemy(GameCharacters):
-    velocity = VelocityCalculator.give_velocity(screen_length, 112)
+    velocity = VelocityCalculator.give_velocity(screen_length, 60)
     knockback_distance = VelocityCalculator.give_measurement(screen_length, 25)
     is_moving_left = True
     is_facing_right = False
@@ -23,6 +24,9 @@ class SimpleEnemy(GameCharacters):
     time_next_to_player = 0
     time_wait_to_use_weapon = 0
     can_move = True
+    eye_color = (255, 42, 42)
+    shield = None
+    have_to_wait_to_use_again = False
     def __init__(self, player):
         self.x_coordinate = 80
         self.length = VelocityCalculator.give_measurement(screen_length, 5)
@@ -32,67 +36,61 @@ class SimpleEnemy(GameCharacters):
         self.current_health = self.full_health
         self.color = self.black
         self.item = Whip(self)
+        self.item.damage = 10
         self.player = player
         self.invincibility__max_time = .4
+        self.shield = Shield(self)
 
-    def has_to_wait_to_use_again(self):
-        max_wait_time = 2
-        if self.total_wait_time > 0 and self.total_wait_time < max_wait_time:
-            self.total_wait_time += VelocityCalculator.time
-            return True
-
-        elif self.total_wait_time >= max_wait_time:
-            self.total_wait_time = 0
-            return False
-
-        if self.item.whip_is_extending:
-            self.total_wait_time += VelocityCalculator.time
-            return False
-
-    # def close_enough_to_player(self):
-    #     if self.player_is_within_range():
-    #         self.time_next_to_player += VelocityCalculator.time
-    #         return False
-    #     else:
-    #         self.time_next_to_player = 0
-
-    #     if self.player_is_within_range() and self.time_next_to_player > .5:
-    #         return True
-    def can_use_item(self):
-        needed_wait_time = 1
+    def use_item_if_can(self):
         if self.is_flinching:
-            return False
-        if self.time_wait_to_use_weapon > needed_wait_time:
-            self.time_wait_to_use_weapon = 0
-            self.color = self.black
-            return not self.has_to_wait_to_use_again() and not self.is_flinching
+            return 
 
-        if self.player_is_within_range() or self.time_wait_to_use_weapon > 0:
-            self.time_wait_to_use_weapon += VelocityCalculator.time
-            self.color = self.yellow
-        return False
+        if self.shield.caused_flinch:
+            if self.time_based_activity_is_done("wait to hit after block"+self.name, .3, False):
+                self.shield.caused_flinch = False
+                self.item.use_item()
+                self.shield.stop_usage()
+            return
+
+        if self.time_based_activity_is_done("wait to use"+self.name, 2, self.shield.is_being_used, self.player_is_within_range()) and not self.shield.is_being_used:
+            self.item.use_item()
+            self.shield.stop_usage()
+
+    def figure_out_blocking(self):
+        # A rough amount; won't be exact since each iteration takes a different amount of time
+        if VelocityCalculator.time == 0 or self.item.whip_is_extending or self.shield.caused_flinch:
+            return
+        iteration_in_a_second = 1 / VelocityCalculator.time
+        can_use_shield = self.player_is_within_range() and UtilityFunctions.random_chance(1, int(iteration_in_a_second * 5))
+        # 1 in 30 chance to block every second; can't use shield when using whip
+        if (can_use_shield or self.shield.is_being_used):
+            print("USE SHIELD")
+            self.shield.use_item()
 
     def movement(self):
         if not self.can_move:
             return
 
-        if self.is_invincible: 
-            self.color = self.white
-            self.do_invincibility()
-        else:
-            self.color = self.black
-
         if self.is_flinching:
             self.flinch()
+            self.color = (250, 0, 0)
             self.item.stop_item_usage()
+            self.shield.stop_item_usage()
             return
+        
+        else: 
+            self.color = self.black
 
-        if self.can_use_item():
-            self.item.use_item()
+        self.figure_out_blocking()
+
+        self.use_item_if_can()
+
         
         self.change_direction_if_necessary()
-        if CollisionsFinder.object_collision(self, self.player) and self.is_moving_left:
-            self.x_coordinate = self.player.right_edge
+
+        if CollisionsFinder.object_collision(self, self.player):
+            return
+
         elif CollisionsFinder.object_collision(self, self.player):
             self.x_coordinate = self.player.x_coordinate - self.length
 
@@ -152,9 +150,13 @@ class SimpleEnemy(GameCharacters):
             self.x_coordinate = self.platform_on.right_edge - self.length
 
     def draw(self):
+        eye_color = (255, 42, 42)
+        if self.player_is_within_range():
+            eye_color = self.yellow
+
         eye_1 = Segment(
             is_percentage=True,
-            color=(255, 42, 42),
+            color=eye_color,
             amount_from_top=30,
             amount_from_left=30,
             length_amount=8,
@@ -162,7 +164,7 @@ class SimpleEnemy(GameCharacters):
         )
         eye_2 = Segment(
             is_percentage=True,
-            color=(255, 42, 42),
+            color=eye_color,
             amount_from_top=30,
             amount_from_left=70,
             length_amount=8,
