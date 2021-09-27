@@ -12,13 +12,14 @@ import pygame
 from time import time
 import math
 from velocity_calculator import VelocityCalculator
-from history_keeper import HistoryKeeper
+from UtilityClasses import HistoryKeeper
 # TODO create class to clean up attributes
 class Player(GameCharacters):
     item = None
     running_velocity = VelocityCalculator.give_velocity(screen_length, 600)
     downwards_velocity = VelocityCalculator.give_velocity(screen_height, 1121)
     amount_jumped = 0
+    booleans = {}
     is_facing_right = False
     can_move_down = True
     on_platform = False
@@ -36,7 +37,7 @@ class Player(GameCharacters):
     game_is_sidescrolling = False
     shield = None
     used_dodge = False
-        
+
     def __init__(self):
         self.item = Whip(self)
         self.shield = Shield(self)
@@ -80,6 +81,9 @@ class Player(GameCharacters):
             width_amount=10)
 
         self.draw_in_segments([eye1, eye2, mouth])
+    
+    def __str__(self):
+        return self.y_coordinate
 
 
 
@@ -87,7 +91,7 @@ class Player(GameCharacters):
     # I.E. if the player holds in the up key and landsThe player would jump again, so this function 
     # tells if that is going to happen and if it is it allows the caller of function to prevent it
     def is_continuous_event(self, event, event_name):
-        HistoryKeeper.add(event, event_name)
+        HistoryKeeper.add(event, event_name, False)
         if HistoryKeeper.get_last(event_name) and event:
             return True
         return False
@@ -177,7 +181,7 @@ class Player(GameCharacters):
             self.is_facing_right = False
 
         # If using whip shield can't be used
-        if (controlls[pygame.K_DOWN] or self.shield.is_being_used) and not self.item.whip_is_extending:
+        if controlls[pygame.K_DOWN] and not self.item.whip_is_extending:
             self.shield.use_item()
         
 

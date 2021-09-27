@@ -1,8 +1,8 @@
-from history_keeper import HistoryKeeper
 from random import random
 from engines import CollisionsFinder
 from items import Shield, Whip
-from UtilityClasses import GameCharacters, Segment, UtilityFunctions
+from UtilityClasses import GameCharacters, Segment
+from UtilityClasses import UtilityFunctions
 from important_variables import (
     screen_length,
     screen_height
@@ -27,7 +27,8 @@ class SimpleEnemy(GameCharacters):
     eye_color = (255, 42, 42)
     shield = None
     have_to_wait_to_use_again = False
-    def __init__(self, player):
+
+    def __init__(self, player=None):
         self.x_coordinate = 80
         self.length = VelocityCalculator.give_measurement(screen_length, 5)
         self.height = VelocityCalculator.give_measurement(screen_height, 15)
@@ -46,15 +47,11 @@ class SimpleEnemy(GameCharacters):
             return 
 
         if self.shield.caused_flinch:
-            if self.time_based_activity_is_done("wait to hit after block"+self.name, .3, False):
-                self.shield.caused_flinch = False
-                self.item.use_item()
-                self.shield.stop_usage()
+            self.counter()
             return
 
         if self.time_based_activity_is_done("wait to use"+self.name, 2, self.shield.is_being_used, self.player_is_within_range()) and not self.shield.is_being_used:
             self.item.use_item()
-            self.shield.stop_usage()
 
     def figure_out_blocking(self):
         # A rough amount; won't be exact since each iteration takes a different amount of time
@@ -62,11 +59,15 @@ class SimpleEnemy(GameCharacters):
             return
         iteration_in_a_second = 1 / VelocityCalculator.time
         can_use_shield = self.player_is_within_range() and UtilityFunctions.random_chance(1, int(iteration_in_a_second * 5))
-        # 1 in 30 chance to block every second; can't use shield when using whip
-        if (can_use_shield or self.shield.is_being_used):
-            print("USE SHIELD")
+        if can_use_shield:
             self.shield.use_item()
 
+    def counter(self):
+        if self.time_based_activity_is_done("wait to hit after block"+self.name, .3, False):
+            self.shield.caused_flinch = False
+            self.item.use_item()
+            self.shield.stop_usage()
+        
     def movement(self):
         if not self.can_move:
             return

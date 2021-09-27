@@ -1,7 +1,7 @@
 from HUD import HUD
 from players import Player
 from velocity_calculator import VelocityCalculator
-from history_keeper import HistoryKeeper
+from UtilityClasses import HistoryKeeper
 
 
 class ScoreKeeper:
