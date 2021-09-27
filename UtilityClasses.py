@@ -119,10 +119,6 @@ class GameObject:
             HistoryKeeper.add(current_time + VelocityCalculator.time, name, False)
 
         return False
-
-    def deepcopy(game_object):
-        return GameObject(game_object.x_coordinate, game_object.y_coordinate, 
-                          game_object.height, game_object.length, game_object.color)
 # TODO better name for something that encompasses all things that have some
 # sort of movement and can be knocked back (probably just enemies and players)
 class GameCharacters(GameObject):
@@ -163,13 +159,6 @@ class GameCharacters(GameObject):
     def do_invincibility(self):
         self.is_invincible = not self.time_based_activity_is_done("invincibility"+self.name, 
                                                                   self.invincibility__max_time, False)
-
-    def deepcopy(game_character):
-        # Makes typing things quicker
-        g = game_character
-        return GameCharacters(g.x_coordinate, g.y_coordinate, g.length, g.height, g.current_health,
-                              g.full_health, g.is_invincible, g.is_flinching, g.is_blocking)
-
 
 class SideScrollableComponents:
     components = []
