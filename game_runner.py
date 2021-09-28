@@ -1,2 +1,3 @@
+import cProfile
 from game_mechanics import GameRunner
-GameRunner.run_game()
+cProfile.run("GameRunner.run_game()", None, "cumtime")

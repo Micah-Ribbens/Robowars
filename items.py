@@ -1,7 +1,6 @@
-from history_keeper import HistoryKeeper
 import pygame
 import os
-from UtilityClasses import GameCharacters, GameObject
+from UtilityClasses import GameCharacters, GameObject, HistoryKeeper
 import math
 from velocity_calculator import VelocityCalculator
 from important_variables import (
@@ -44,7 +43,7 @@ class Whip(Item):
     player = None
     full_length = 70
 
-    def __init__(self, player):
+    def __init__(self, player=None):
         self.color = (77, 38, 0)
         self.player = player
 
@@ -150,29 +149,47 @@ class Shield(Item):
     player = None
     is_being_used = False
     caused_flinch = False
-    def __init__(self, player):
-        self.player = player
 
-    def draw(self):
+    def __init__(self, player=None):
+        self.player = player
+        self.color = (250, 0, 0)
+
+    def render(self):
+        if not self.is_being_used:
+            return
+
+        shield_is_done = self.time_based_activity_is_done("shield"+self.player.name, .3, False)
+
+        if shield_is_done:
+            self.is_being_used = False
+
+        if shield_is_done and not self.caused_flinch:
+            self.player.flinch()
+
+        self.set_dimensions()
+        self.draw()
+
+    def set_dimensions(self):
         self.length = 20
         self.height = self.player.height
+
         if self.player.is_facing_right:
             self.x_coordinate = self.player.right_edge
+
         else:
             self.x_coordinate = self.player.x_coordinate - self.length
+
         self.y_coordinate = self.player.y_coordinate
-        self.color = (0, 0, 250)
-        GameObject.draw(self)
 
     def use_item(self):
-        was_being_used = self.is_being_used
-        self.is_being_used = not self.time_based_activity_is_done("shield"+self.player.name, .3, False)
-        if self.is_being_used:
-            self.draw()
-        if was_being_used and not self.is_being_used and not self.caused_flinch:
-            self.player.flinch()
+        # was_being_used = self.is_being_used
+        self.is_being_used = True
+
+        # if was_being_used and not self.is_being_used and not self.caused_flinch:
+        #     self.player.flinch()
             
     def stop_usage(self):
+        print("CALLED")
         self.is_being_used = False
 
         

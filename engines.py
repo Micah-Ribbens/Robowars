@@ -1,11 +1,10 @@
-from UtilityClasses import GameObject
+from UtilityClasses import GameObject, HistoryKeeper
 from items import Whip
 from important_variables import (
     screen_height,
     screen_length,
     y_velocities
 )
-from history_keeper import HistoryKeeper
 from velocity_calculator import VelocityCalculator
 from wall_of_death import WallOfDeath
 from platforms import Platform
@@ -16,6 +15,7 @@ class CollisionsFinder:
         is_platform_collision = CollisionsFinder.object_collision(player, platform)
         if player.bottom == platform.y_coordinate:
             return is_platform_collision
+        # print(HistoryKeeper.get_las("player"))
         if not is_player or len(HistoryKeeper.get("player")) <= 1:
             return is_platform_collision
         

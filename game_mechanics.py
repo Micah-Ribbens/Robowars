@@ -1,5 +1,4 @@
-from history_keeper import HistoryKeeper
-from UtilityClasses import GameObject, SideScrollableComponents
+from UtilityClasses import GameObject, HistoryKeeper, SideScrollableComponents
 from enemies import SimpleEnemy
 import time
 from velocity_calculator import VelocityCalculator
@@ -38,6 +37,7 @@ class GameRunner:
     doggo = Player()
     pause_is_held_down = False
     game_paused = False
+
     def reset_variables():
         enemy = SimpleEnemy(GameRunner.doggo)
         # TODO change back
@@ -47,10 +47,16 @@ class GameRunner:
         enemy.platform_on = platform
         GameRunner.platforms = [platform]
         GameRunner.doggo = Player()
+        Player.attributes = GameObject.find_all_attributes(Player())
+        SimpleEnemy.attributes = GameObject.find_all_attributes(SimpleEnemy())
+        Platform.attributes = GameObject.find_all_attributes(Platform())
         GameRunner.doggo.y_coordinate = GameRunner.platforms[0].y_coordinate - GameRunner.doggo.height - 100
         WallOfDeath.reset()
         ScoreKeeper.reset()
         HistoryKeeper.reset()
+        print(Player.attributes)
+        print(SimpleEnemy.attributes)
+        print(Platform.attributes)
 
     def game_is_paused():
         pause_clicked = HUD.pause_clicked()

@@ -8,7 +8,7 @@ from engines import (
 )
 from HUD import HUD
 from score_keeper import ScoreKeeper
-from history_keeper import HistoryKeeper
+from UtilityClasses import HistoryKeeper
 from players import Player
 
 
@@ -31,29 +31,31 @@ class GameRenderer:
     def draw_everything(player: Player, enemies, platforms, game_is_paused):
         player.draw()
         player.item.render()
+        player.shield.render()
         for x in range(len(enemies)):
             enemy = enemies[x]
             enemy.name = f"enemy{x}"
-            HistoryKeeper.add(enemy, enemy.name)
+            HistoryKeeper.add(enemy, enemy.name, True)
+
             if enemy.is_within_screen and enemy.current_health > 0:
                 enemy.player = player
                 enemy.draw()
                 enemy.item.render()
+                enemy.shield.render()
                 HUD.show_enemy_health(enemy)
 
             if HistoryKeeper.get_last(enemy.name).current_health > 0 and enemy.current_health <= 0:
                 UtilityFunctions.draw_font("+100", pygame.font.Font('freesansbold.ttf', 10), x_coordinate=enemy.x_coordinate, y_coordinate=enemy.y_coordinate)
                 ScoreKeeper.score += 100
 
-
         for x in range(len(platforms)):
             platform = platforms[x]
             if platform.is_within_screen:
                 platform.name = f"platform{x}"
-                HistoryKeeper.add(platform, platform.name)
+                HistoryKeeper.add(platform, platform.name, True)
                 platform.draw()
 
-        HistoryKeeper.add(player, "player")
+        HistoryKeeper.add(player, "player", True)
         HUD.render_pause_button(game_is_paused)
         HUD.show_character_health(player)
         ScoreKeeper.give_score(player)

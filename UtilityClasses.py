@@ -1,10 +1,11 @@
-import random
 from important_variables import window
 import pygame
-from history_keeper import HistoryKeeper
 from abc import abstractmethod
 from velocity_calculator import VelocityCalculator
-from important_variables import screen_height, screen_length, background
+from important_variables import screen_height, background, screen_length, window
+import random
+from utility_functions import *
+import pickle
 class Segment:
     is_percentage = False
     color = (0,0,0)
@@ -48,6 +49,15 @@ class GameObject:
     color = (0, 0, 250)
     is_within_screen = True
     name = ""
+    attributes = []
+
+    def find_all_attributes(self):
+        attributes = []
+        for key in self.__dict__.keys():
+            if not key.__contains__("__") and not callable(key):
+                attributes.append(key)
+        return attributes
+
     # @property automatically changes this "attribute" when the x_coordinate or length changes
     # Can be treated as an attribute
     @property 
@@ -65,6 +75,7 @@ class GameObject:
     @property
     def x_midpoint(self):
         return self.x_coordinate + self.length * .5
+
     def __str__(self):
         return f"x {self.x_coordinate} y {self.y_coordinate} height {self.height} length {self.length} right_edge {self.right_edge} bottom {self.bottom}"    
     # Equal signs used so the __init__ function is optional when creating an instance of the class
@@ -91,27 +102,24 @@ class GameObject:
 
     def time_based_activity_is_done(self, name, time_needed, restart_condition, start_condition=True):
         if restart_condition:
-            HistoryKeeper.add(0, name)
+            HistoryKeeper.add(0, name, False)
             return False
         # if not start_condition:
         #     return True
 
         if HistoryKeeper.get_last(name) is None:
-            HistoryKeeper.add(VelocityCalculator.time, name)
+            HistoryKeeper.add(VelocityCalculator.time, name, False)
 
         current_time = HistoryKeeper.get_last(name)
         if current_time >= time_needed:
-            HistoryKeeper.add(0, name)
+            HistoryKeeper.add(0, name, False)
             return True
 
         else:
-            HistoryKeeper.add(current_time + VelocityCalculator.time, name)
+            HistoryKeeper.add(current_time + VelocityCalculator.time, name, False)
 
         return False
-
-
-
-# TODO better name for something that encompasses all things that have some 
+# TODO better name for something that encompasses all things that have some
 # sort of movement and can be knocked back (probably just enemies and players)
 class GameCharacters(GameObject):
     current_health = 0
@@ -124,6 +132,11 @@ class GameCharacters(GameObject):
     total_invincibility_time = 0
     is_blocking = False
 
+    def __init__(self, x, y, length, height, current_health, full_health, is_invincible, is_flinching, is_blocking):
+        self.x_cooridnate, self.y_coordinate, self.length = x, y, length
+        self.height, self.current_health, self.full_health = height, current_health, full_health
+        self.is_invincible, self.is_flinching, self.is_blocking = is_invincible, is_flinching, is_blocking
+
     def knockback(self, damage=0, **kwargs):
         """One **kwargs should be direction_is_left"""
         UtilityFunctions.validate_kwargs_has_all_fields(["direction_is_left"], kwargs)
@@ -135,29 +148,17 @@ class GameCharacters(GameObject):
     @abstractmethod
     def movement(self):
         pass
-    
+
     def do_block(self):
         self.is_blocking = not self.time_based_activity_is_done("blocking"+self.name, .2, False)
-        
 
     def flinch(self):
         self.is_flinching = not self.time_based_activity_is_done("flinching"+self.name, 
                                                                  .5, False)
-        # flinching_total_time = .2
-        # if self.time_spent_flinching >= flinching_total_time:
-        #     self.is_flinching = False
-        #     self.time_spent_flinching = 0
-        # else:
-        #     self.is_flinching = True
-        #     self.time_spent_flinching += VelocityCalculator.time
 
     def do_invincibility(self):
         self.is_invincible = not self.time_based_activity_is_done("invincibility"+self.name, 
-                                                              self.invincibility__max_time, False)
-    
-
-        
-
+                                                                  self.invincibility__max_time, False)
 
 class SideScrollableComponents:
     components = []
@@ -166,10 +167,10 @@ class SideScrollableComponents:
         for component in SideScrollableComponents.components:
             component.x_coordinate -= amount
 
-
 class UtilityFunctions:
     def random_chance(numerator, denominator):
         return random.randint(numerator, denominator) == numerator
+
     def validate_kwargs_has_all_fields(kwargs_fields, kwargs):
         for field in kwargs_fields:
             if not kwargs.__contains__(field):
@@ -189,8 +190,9 @@ class UtilityFunctions:
             text_rect.center = (screen_length / 2,
                                 screen_height / 2)
         window.blit(text, text_rect)
+
     # Meaning what the current health and lost_health are multiplied
-    def draw_health_bar(game_character: GameCharacters, x_coordinate, 
+    def draw_health_bar(game_character, x_coordinate, 
                         y_coordinate, width, health_bar_length):
         current_health_color = (0, 255, 0)
         health_lost = game_character.full_health - game_character.current_health
@@ -210,6 +212,35 @@ class UtilityFunctions:
     def percentage_to_number(perecentage, percentage_of_number):
         return perecentage / 100 * percentage_of_number
 
+# Delete unneeded times
+class HistoryKeeper:
+    memento_list = {}
+    def reset():
+        HistoryKeeper.memento_list = {}
+    def copy(object):
+        return pickle.loads(pickle.dumps(object, -1))
+    def add(object, name, is_game_object):
+        if is_game_object:
+            object = deepcopy(object)
+
+        HistoryKeeper._add(object, name)
+        
+    def _add(object, name):
+        try: 
+            HistoryKeeper.memento_list[name].append(object)
+        except KeyError:
+            HistoryKeeper.memento_list[name] = [object]
 
 
+    def get(name):
+        if HistoryKeeper.memento_list.get(name) is None:
+            return []
+        return HistoryKeeper.memento_list.get(name)
 
+    def get_last(name):
+        mementos = HistoryKeeper.get(name)
+        if len(mementos) == 0:
+            return None
+        if len(mementos) == 1:
+            return mementos[0]
+        return mementos[len(mementos) - 2]
