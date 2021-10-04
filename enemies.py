@@ -50,8 +50,8 @@ class SimpleEnemy(GameCharacters):
             self.counter()
             return
 
-        if self.time_based_activity_is_done("wait to use"+self.name, 2, self.shield.is_being_used, self.player_is_within_range()) and not self.shield.is_being_used:
-            self.item.use_item()
+        # if self.time_based_activity_is_done("wait to use"+self.name, 2, self.shield.is_being_used, self.player_is_within_range()) and not self.shield.is_being_used:
+        #     self.item.use_item()
 
     def figure_out_blocking(self):
         # A rough amount; won't be exact since each iteration takes a different amount of time

@@ -37,27 +37,39 @@ class Whip(Item):
     whip_is_extending = False
     full_animation_time = .1
     secs_extended = 0
-    velocity = VelocityCalculator.give_velocity(screen_length, 670)
     up_length = VelocityCalculator.give_measurement(screen_height, 14)
     max_length = VelocityCalculator.give_measurement(screen_length, 8.75)
     player = None
     full_length = 70
+    RIGHT_ATTACK = 0
+    UPWARDS_ATTACK = 1
+    DOWNWARDS_ATTACK = 2
+    DASH_ATTACK = 3
+    LEFT_ATTACK = 4
+    move_type = None
+
+    def reset(self):
+        self.length = 0
+        self.height = 0
+        self.secs_extended = 0
+        self.move_type = None
 
     def __init__(self, player=None):
         self.color = (77, 38, 0)
         self.player = player
 
-    def use_item(self):
+    def use_item(self, move_type):
         if not self.whip_is_extending:
             self.whip_is_extending = True
+        self.move_type = move_type
 
-    def draw_whip_upwards(self):
+    def draw_whip_upwards(self, direction_is_right):
         player_midpoint = self.player.y_coordinate + (self.player.height * .5)
         self.y_coordinate = player_midpoint - self.up_length
         self.height = self.up_length
         self.length = self.base_height
         self.secs_extended += VelocityCalculator.time
-        if self.player.is_facing_right:
+        if direction_is_right:
             self.x_coordinate = self.player.right_edge
         else:
             self.x_coordinate = self.player.x_coordinate - self.length
@@ -71,41 +83,62 @@ class Whip(Item):
         time_is_too_long = self.secs_extended > secs_needed_to_start_extending
         return is_right_length and not time_is_too_long
 
-    def draw_whip_extending(self):
+    def draw_whip_extending(self, direction_is_right):
+        velocity = VelocityCalculator.give_velocity(screen_length, 670)
         self.height = self.base_height
-        player_midpoint = self.player.y_coordinate + (self.player.height * .5)
-        self.y_coordinate = player_midpoint
-        length_increase = VelocityCalculator.calc_distance(self.velocity)
+        self.y_coordinate = self.player.y_midpoint
+        length_increase = VelocityCalculator.calc_distance(velocity)
         self.length += length_increase
-        # TODO change it not t player but game object or something since both player and enemy use it and change stuff
         # Associated with that
-        if self.player.is_facing_right:
+        if direction_is_right:
             self.x_coordinate = self.player.right_edge
         else:
             # Since it draw from left to right the x_coordinate would have to move to the left
             # By the amount of the increase of length
             self.x_coordinate = self.player.x_coordinate - self.length
+    
+    def regular_attack(self, direction_is_right):
+        if self.whip_is_upwards():
+            self.draw_whip_upwards(direction_is_right)
+        elif self.length <= self.max_length:
+            self.draw_whip_extending(direction_is_right)
+        else:
+            self.reset()
+    def left_attack(self):
+        self.regular_attack(False)
+    def right_attack(self):
+        self.regular_attack(True)
+    def setup_slash_attack(self):
+        self.height = self.base_height
+        self.secs_extended += VelocityCalculator.time
+        self.length = self.max_length
+        self.x_coordinate = self.player.right_edge if self.player.is_facing_right else self.player.x_coordinate - self.length
+        
+
+    def upwards_attack(self):
+        velocity = VelocityCalculator.give_velocity(screen_length, 450)
+        self.setup_slash_attack()
+        self.y_coordinate = self.player.y_midpoint - velocity * self.secs_extended
+        if self.y_coordinate <= self.player.y_coordinate:
+            self.reset()
+
+    def downwards_attack(self):
+        velocity = VelocityCalculator.give_velocity(screen_length, 450)
+        self.setup_slash_attack()
+        self.y_coordinate = self.player.y_midpoint + velocity * self.secs_extended
+        if self.y_coordinate >= self.player.bottom:
+            self.reset()
 
     def render(self):
-        if not self.whip_is_extending:
-            return
-        whip_is_too_long = self.length >= 70
-
-        if whip_is_too_long:
-            self.whip_is_extending = False
-            self.length = 0
-            self.height = 0
-            self.secs_extended = 0
+        if self.move_type is None:
             return
 
-        if not self.whip_is_extending:
-            return
-
-        if self.whip_is_upwards():
-            self.draw_whip_upwards()
-        
-        else:
-            self.draw_whip_extending()
+        move_types = {self.RIGHT_ATTACK: self.right_attack,
+                      self.LEFT_ATTACK: self.left_attack,
+                      self.DOWNWARDS_ATTACK: self.downwards_attack,
+                      self.UPWARDS_ATTACK: self.upwards_attack}
+        # Calls the function of the movetype (gets function then calls it)
+        move_types.get(self.move_type)()
 
         self.draw()
 
@@ -115,7 +148,7 @@ class Sword(Item):
         return (last_time / self.full_animation_time) * 180
     def get_radians(self):
         return math.radians(self.get_degrees())
-    def draw(self):
+    def render(self):
         pygame.draw.line(window, self.color, (self.player.right_edge, self.player.y_midpoint), (self.get_x(), self.get_y()), self.base_height)
 
     def get_x(self):

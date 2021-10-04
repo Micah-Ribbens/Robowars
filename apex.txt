@@ -17,6 +17,8 @@ from UtilityClasses import HistoryKeeper
 class Player(GameCharacters):
     item = None
     running_velocity = VelocityCalculator.give_velocity(screen_length, 600)
+    amount_jumped = 0
+    booleans = {}
     is_facing_right = False
     can_move_down = True
     on_platform = False
@@ -88,6 +90,9 @@ class Player(GameCharacters):
     def __str__(self):
         return self.y_coordinate
 
+
+
+
     # I.E. if the player holds in the up key and landsThe player would jump again, so this function 
     # tells if that is going to happen and if it is it allows the caller of function to prevent it
     def is_continuous_event(self, event, event_name):
@@ -96,6 +101,16 @@ class Player(GameCharacters):
             return True
         return False
 
+    def is_apex_height(self):
+        last_player = HistoryKeeper.get_last("player")
+        if self.apex_time >= self.apex_max_time or last_player is None:
+            return False
+
+        hit_top_of_screen = last_player.can_jump and not self.can_jump
+        return (self.amount_jumped >= self.max_jump_height
+                or hit_top_of_screen or self.apex_time > 0)
+
+        
 
     # For all functions that have movement syntax is "do" = always does it,
     # Otherwise logic inside function to figure out if that movement should be done
@@ -128,13 +143,29 @@ class Player(GameCharacters):
             self.time_affected_by_gravity += VelocityCalculator.time
         else:
             self.time_affected_by_gravity = 0
+        # if not self.can_jump and not self.is_apex_height():
+        #     self.reset_jump()
         if self.on_platform:
+            print("ON")
             # Makes sure doesn't keep jumping up and down
             self.can_jump = not self.is_continuous_event(jump_key_held_down, "jump")
+            if not self.can_jump:
+                print("NO JUMP")
+                                        
+        # If the player is jumping and the jump_key isn't held down,
+        # The player has to be in the apex
+        last_player = HistoryKeeper.get_last("player")
+        # In the first iteration there is no last player, so this protects code from NoneType Error
+        if last_player is None:
+            return
 
+        # if (self.is_apex_height() or jump_key_was_released) and self.is_jumping:
+        #     self.can_jump = False
+        #     self.do_apex()
+
+        # If the player is at the apex, the player shouldn't be able to jump
         if self.on_platform:
             self.last_y_unmoving = self.last_platform_on.y_coordinate
-            
         if (self.can_jump and jump_key_held_down) or self.is_jumping:
             self.do_jump()
 
@@ -152,6 +183,7 @@ class Player(GameCharacters):
 
         if self.can_dodge() and controlls[pygame.K_DOWN]:
             self.do_invincibility(.2)
+            print("DODGe")
             self.used_dodge = True
 
         if self.is_flinching:
@@ -209,11 +241,12 @@ class Player(GameCharacters):
             self.jump_time = 0
             self.last_y_unmoving = self.y_coordinate
             self.can_jump = False
+            print("done wiht jump")
             return
 
         self.y_coordinate = self.last_platform_on.y_coordinate - distance_change - self.height
 
-    # TODO fix this
+    # TODO why max should be be time_in_air from jumping from one platform to the next
     def time_in_air(self, new_platform_y_coordinate, last_platform_y_coordinate, gravity):
         upwards_time = 0
         max_y_coordinate = 0

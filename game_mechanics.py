@@ -42,11 +42,16 @@ class GameRunner:
         enemy = SimpleEnemy(GameRunner.doggo)
         # TODO change back
         # enemy.is_within_screen = False
-        GameRunner.enemies = [enemy]
+        GameRunner.enemies = []
         platform = Platform()
+        # TODO change back, but just wanna test movements
+        platform.x_coordinate = 0
+        platform.length = screen_length
+
         enemy.platform_on = platform
         GameRunner.platforms = [platform]
         GameRunner.doggo = Player()
+        GameRunner.doggo.y_coordinate = platform.y_coordinate + 70 + GameRunner.doggo.height
         Player.attributes = GameObject.find_all_attributes(Player())
         SimpleEnemy.attributes = GameObject.find_all_attributes(SimpleEnemy())
         Platform.attributes = GameObject.find_all_attributes(Platform())
@@ -54,9 +59,6 @@ class GameRunner:
         WallOfDeath.reset()
         ScoreKeeper.reset()
         HistoryKeeper.reset()
-        print(Player.attributes)
-        print(SimpleEnemy.attributes)
-        print(Platform.attributes)
 
     def game_is_paused():
         pause_clicked = HUD.pause_clicked()
@@ -73,11 +75,13 @@ class GameRunner:
         return GameRunner.game_paused
 
     def add_sidescroll_components():
-        SideScrollableComponents.components = []
-        for x in range(len(GameRunner.enemies)):
-            SideScrollableComponents.components.append(GameRunner.enemies[x])
-        for x in range(len(GameRunner.platforms)):
-            SideScrollableComponents.components.append(GameRunner.platforms[x])
+        pass
+        # TODO change back, just don't want sidescrolling for now
+        # SideScrollableComponents.components = []
+        # for x in range(len(GameRunner.enemies)):
+        #     SideScrollableComponents.components.append(GameRunner.enemies[x])
+        # for x in range(len(GameRunner.platforms)):
+        #     SideScrollableComponents.components.append(GameRunner.platforms[x])
 
     def delete_unneeded_objects():
         for x in range(len(GameRunner.platforms)):

@@ -72,17 +72,21 @@ class Generator:
         # IMPORTANT: order has to be height, lengths, y_coordinate, x_coordinate, randomize_platform_terrain()
         # Length and height dictate y_coordinate, y_coordinate dictates x_coordinate, and randomize_platform_terrain()
         # Changes the length so it can't be changed back by the generate_platform_length()
-        new_platform = Platform()
+        # TODO change back
+        # new_platform = Platform()
         last_platform = platforms[len(platforms) - 1]
-        new_platform.height = generate_platform_height()
-        new_platform.length = generate_platform_length()
-        new_platform.y_coordinate = generate_platform_y_coordinate(player, last_platform, new_platform)
+        # new_platform.height = generate_platform_height()
+        # new_platform.length = generate_platform_length()
+        # new_platform.y_coordinate = generate_platform_y_coordinate(player, last_platform, new_platform)
 
-        new_platform.platform_color = (0, 250, 0)
-        players_time_in_air = player.time_in_air(new_platform.y_coordinate, last_platform.y_coordinate, gravity)
-        new_platform.x_coordinate = generate_platform_x_coordinate(players_time_in_air, player.running_velocity, last_platform, new_platform)
-        randomize_platform_terrain(new_platform)
+        # new_platform.platform_color = (0, 250, 0)
+        # players_time_in_air = player.time_in_air(new_platform.y_coordinate, last_platform.y_coordinate, gravity)
+        # new_platform.x_coordinate = generate_platform_x_coordinate(players_time_in_air, player.running_velocity, last_platform, new_platform)
+        # randomize_platform_terrain(new_platform)
 
+        # platforms.append(new_platform)
+        new_platform = Platform()
+        new_platform.x_coordinate = last_platform.right_edge
         platforms.append(new_platform)
         return platforms
 

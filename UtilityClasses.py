@@ -156,9 +156,10 @@ class GameCharacters(GameObject):
         self.is_flinching = not self.time_based_activity_is_done("flinching"+self.name, 
                                                                  .5, False)
 
-    def do_invincibility(self):
+    def do_invincibility(self, time=None):
+        time = self.invincibility__max_time if time == None else time
         self.is_invincible = not self.time_based_activity_is_done("invincibility"+self.name, 
-                                                                  self.invincibility__max_time, False)
+                                                                  time, False)
 
 class SideScrollableComponents:
     components = []

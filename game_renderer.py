@@ -112,6 +112,7 @@ class GameRenderer:
             player.can_move_right = True
             player.on_platform = True
             player.y_coordinate = platform_player_on.y_coordinate - player.height
+            player.last_platform_on = platform_player_on
         
     def render_players_and_platforms(platforms, player):
         is_rightside_collision = False

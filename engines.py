@@ -8,7 +8,6 @@ from important_variables import (
 from velocity_calculator import VelocityCalculator
 from wall_of_death import WallOfDeath
 from platforms import Platform
-from players import Player
 
 class CollisionsFinder:
     def on_platform(platform, player, is_player):
@@ -80,29 +79,33 @@ class CollisionsFinder:
         return leftside_collision
 
 class PhysicsEngine:
-    gravity_pull = y_velocities
+    gravity_pull = -3500
     player_died = False
     
     def do_gravity(player):
-        player.y_coordinate += VelocityCalculator.calc_distance(PhysicsEngine.gravity_pull)
+        change = -PhysicsEngine.distance_change(0, PhysicsEngine.gravity_pull, player.time_affected_by_gravity)
+        player.y_coordinate = change + player.last_y_unmoving
 
-    def is_beyond_screen_right(player: Player):
+    def is_beyond_screen_right(player):
         if player.x_coordinate >= screen_length - player.length:
             return True
 
         return False
 
-    def is_beyond_screen_left(player: Player):
+    def distance_change(velocity, acceleration, time):
+        return velocity * time + (acceleration * time ** 2 / 2)
+
+    def is_beyond_screen_left(player):
         if player.x_coordinate <= 0:
             return True
 
         return False
 
-    def player_hit_top_of_screen(player: Player):
+    def player_hit_top_of_screen(player):
         if player.y_coordinate <= 0:
             player.can_jump = False
 
-    def is_below_screen_bottom(player: Player):
+    def is_below_screen_bottom(player):
         if player.y_coordinate >= screen_height:
             return True
 
@@ -110,7 +113,7 @@ class PhysicsEngine:
 
 
 class InteractionEngine:
-    def player_enemy_interactions(player: Player, enemy):
+    def player_enemy_interactions(player, enemy):
         if not CollisionsFinder.object_collision(player, enemy):
             return
 
