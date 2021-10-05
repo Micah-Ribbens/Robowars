@@ -10,6 +10,7 @@ from HUD import HUD
 from score_keeper import ScoreKeeper
 from UtilityClasses import HistoryKeeper
 from players import Player
+from important_variables import screen_length
 
 
 class GameRenderer:
@@ -76,8 +77,9 @@ class GameRenderer:
             player.can_move_right = False
             player.x_coordinate = platform_collided_into.x_coordinate - player.length
 
-        elif PhysicsEngine.is_beyond_screen_right(player):
+        if PhysicsEngine.is_beyond_screen_right(player):
             player.can_move_right = False
+            player.x_coordinate = screen_length - player.width
         
         else: 
             player.can_move_right = True
@@ -86,7 +88,7 @@ class GameRenderer:
             player.can_move_left = False
             player.x_coordinate = platform_collided_into.x_coordinate + platform_collided_into.length
             
-        elif PhysicsEngine.is_beyond_screen_left(player):
+        if PhysicsEngine.is_beyond_screen_left(player):
             player.can_move_left = False
             player.x_coordinate = 0
 

@@ -53,6 +53,7 @@ class GameRunner:
         GameRunner.doggo = Player()
         GameRunner.doggo.y_coordinate = platform.y_coordinate + 70 + GameRunner.doggo.height
         Player.attributes = GameObject.find_all_attributes(Player())
+        print(Player.attributes)
         SimpleEnemy.attributes = GameObject.find_all_attributes(SimpleEnemy())
         Platform.attributes = GameObject.find_all_attributes(Platform())
         GameRunner.doggo.y_coordinate = GameRunner.platforms[0].y_coordinate - GameRunner.doggo.height - 100

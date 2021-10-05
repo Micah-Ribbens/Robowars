@@ -51,9 +51,10 @@ class GameObject:
     name = ""
     attributes = []
 
-    def find_all_attributes(self):
+    def find_all_attributes(object):
         attributes = []
-        for key in self.__dict__.keys():
+        for key in object.__dict__.keys():
+            print(key)
             if not key.__contains__("__") and not callable(key):
                 attributes.append(key)
         return attributes

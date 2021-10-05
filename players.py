@@ -1,4 +1,4 @@
-from UtilityClasses import GameCharacters, Segment, SideScrollableComponents
+from UtilityClasses import GameCharacters, Segment
 from important_variables import (
     screen_height,
     screen_length,
@@ -17,6 +17,8 @@ from UtilityClasses import HistoryKeeper
 class Player(GameCharacters):
     item = None
     running_velocity = VelocityCalculator.give_velocity(screen_length, 600)
+    running_deceleration = -1200.
+    is_decelerating = False
     is_facing_right = False
     can_move_down = True
     on_platform = False
@@ -40,8 +42,10 @@ class Player(GameCharacters):
     last_y_unmoving = 0
     last_platform_on = None
     time_affected_by_gravity = 0
+    x_before_decelerating = 0
 
     def __init__(self):
+        self.controlls = pygame.key.get_pressed()
         self.item = Whip(self)
         self.shield = Shield(self)
         self.item.damage = 10
@@ -54,7 +58,8 @@ class Player(GameCharacters):
         self.invincibility__max_time = .6
         self.length = VelocityCalculator.give_measurement(screen_length, 5)
         self.height = VelocityCalculator.give_measurement(screen_height, 15)
-    
+        self.time_affected_by_deceleration = 0
+
     def draw(self):
         eye_color = (0,0,255)
         mouth_color = GameObject.red
@@ -107,8 +112,17 @@ class Player(GameCharacters):
 
         if self.is_flinching:
             return True
+    # TODO think of better name
+    def deceleration_figure_outter(self, key):
+        if not self.on_platform:
+            return
+        last_player = HistoryKeeper.get_last("player")
+        if last_player is not None and last_player.controlls[key] and not self.controlls[key]:
+            self.is_decelerating = True
+            self.x_before_decelerating = self.x_coordinate
 
     def rightwards_movement(self, right_key_is_held_down):
+        self.deceleration_figure_outter(pygame.K_RIGHT)
         if not right_key_is_held_down or not self.can_move_right:
             self.game_is_sidescrolling = False
             return
@@ -122,6 +136,19 @@ class Player(GameCharacters):
 
         # else:
         self.x_coordinate += VelocityCalculator.calc_distance(self.running_velocity)
+
+    def decelerate(self):
+        self.time_affected_by_deceleration += VelocityCalculator.time
+        current_change = PhysicsEngine.distance_change(self.running_velocity, self.running_deceleration, self.time_affected_by_deceleration)
+        last_player = HistoryKeeper.get_last("player")
+        prev_change = PhysicsEngine.distance_change(self.running_velocity, self.running_deceleration, last_player.time_affected_by_deceleration)
+        if prev_change > current_change:
+            self.is_decelerating = False
+            self.time_affected_by_deceleration = 0
+            return
+
+        self.x_coordinate = (current_change + self.x_before_decelerating if self.is_facing_right 
+                             else self.x_before_decelerating - current_change)
 
     def upwards_movement(self, jump_key_held_down):
         if not self.is_jumping and not self.on_platform:
@@ -145,12 +172,12 @@ class Player(GameCharacters):
         self.can_jump = False
 
     def movement(self):
-        controlls = pygame.key.get_pressed()
+        self.controlls = pygame.key.get_pressed()
         # If the character gets hit and thus is flinching the character shouldn't be able to move
         if self.is_blocking:
             self.do_block()
 
-        if self.can_dodge() and controlls[pygame.K_DOWN]:
+        if self.can_dodge() and self.controlls[pygame.K_DOWN]:
             self.do_invincibility(.2)
             self.used_dodge = True
 
@@ -173,23 +200,28 @@ class Player(GameCharacters):
         if self.is_flinching:
             return
 
-        self.rightwards_movement(controlls[pygame.K_RIGHT])
-        self.upwards_movement(controlls[pygame.K_UP])
+        self.rightwards_movement(self.controlls[pygame.K_RIGHT])
+        self.upwards_movement(self.controlls[pygame.K_UP])
 
-        if controlls[pygame.K_LEFT] and self.can_move_left:
+        if self.controlls[pygame.K_LEFT] and self.can_move_left:
             self.x_coordinate -= VelocityCalculator.calc_distance(self.running_velocity)
             self.is_facing_right = False
+        
+        self.deceleration_figure_outter(pygame.K_LEFT)
 
         # If using whip shield can't be used
-        if controlls[pygame.K_DOWN] and not self.item.whip_is_extending:
+        if self.controlls[pygame.K_DOWN] and not self.item.whip_is_extending:
             self.shield.use_item()
         
+        if self.is_decelerating:
+            self.decelerate()
+        
         # If using shield can't use item
-        if not self.shield.is_being_used and not self.is_continuous_event(controlls[pygame.K_w] or controlls[pygame.K_s], "slash"):
-            moves = {controlls[pygame.K_w]: self.item.UPWARDS_ATTACK,
-                     controlls[pygame.K_s]: self.item.DOWNWARDS_ATTACK,
-                     controlls[pygame.K_d]: self.item.RIGHT_ATTACK,
-                     controlls[pygame.K_a]: self.item.LEFT_ATTACK}
+        if not self.shield.is_being_used and not self.is_continuous_event(self.controlls[pygame.K_w] or self.controlls[pygame.K_s], "slash"):
+            moves = {self.controlls[pygame.K_w]: self.item.UPWARDS_ATTACK,
+                     self.controlls[pygame.K_s]: self.item.DOWNWARDS_ATTACK,
+                     self.controlls[pygame.K_d]: self.item.RIGHT_ATTACK,
+                     self.controlls[pygame.K_a]: self.item.LEFT_ATTACK}
 
             self.item.use_item(self.get_move(moves))
         
