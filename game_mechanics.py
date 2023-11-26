@@ -29,7 +29,7 @@ from game_renderer import GameRenderer
 from generator import Generator
 from score_keeper import ScoreKeeper
 
-nameOfGame = "robowars"
+nameOfGame = "Robowars"
 pygame.display.set_caption(f'{nameOfGame}')
 class GameRunner:
     enemies = []
@@ -40,20 +40,16 @@ class GameRunner:
 
     def reset_variables():
         enemy = SimpleEnemy(GameRunner.doggo)
-        # TODO change back
-        # enemy.is_within_screen = False
+        enemy.is_within_screen = False
         GameRunner.enemies = []
         platform = Platform()
-        # TODO change back, but just wanna test movements
         platform.x_coordinate = 0
-        platform.length = screen_length
 
         enemy.platform_on = platform
         GameRunner.platforms = [platform]
         GameRunner.doggo = Player()
         GameRunner.doggo.y_coordinate = platform.y_coordinate + 70 + GameRunner.doggo.height
         Player.attributes = GameObject.find_all_attributes(Player())
-        print(Player.attributes)
         SimpleEnemy.attributes = GameObject.find_all_attributes(SimpleEnemy())
         Platform.attributes = GameObject.find_all_attributes(Platform())
         GameRunner.doggo.y_coordinate = GameRunner.platforms[0].y_coordinate - GameRunner.doggo.height - 100
@@ -63,7 +59,6 @@ class GameRunner:
 
     def game_is_paused():
         pause_clicked = HUD.pause_clicked()
-        # TODO can_pause? Isn't this used to pause and unpause?
         can_pause = not GameRunner.pause_is_held_down and pause_clicked
 
         if pause_clicked:
@@ -76,13 +71,11 @@ class GameRunner:
         return GameRunner.game_paused
 
     def add_sidescroll_components():
-        pass
-        # TODO change back, just don't want sidescrolling for now
-        # SideScrollableComponents.components = []
-        # for x in range(len(GameRunner.enemies)):
-        #     SideScrollableComponents.components.append(GameRunner.enemies[x])
-        # for x in range(len(GameRunner.platforms)):
-        #     SideScrollableComponents.components.append(GameRunner.platforms[x])
+        SideScrollableComponents.components = []
+        for x in range(len(GameRunner.enemies)):
+            SideScrollableComponents.components.append(GameRunner.enemies[x])
+        for x in range(len(GameRunner.platforms)):
+            SideScrollableComponents.components.append(GameRunner.platforms[x])
 
     def delete_unneeded_objects():
         for x in range(len(GameRunner.platforms)):
@@ -103,6 +96,7 @@ class GameRunner:
             # Another platform isn't needed because it won't be visible
             if last_platform.right_edge > screen_length:
                 return
+
             GameRunner.platforms = Generator.generate_platform(GameRunner.platforms, GameRunner.doggo, PhysicsEngine.gravity_pull)
             last_platform = GameRunner.platforms[len(GameRunner.platforms) - 1]
             GameRunner.enemies = Generator.generate_enemy(last_platform, GameRunner.enemies, GameRunner.doggo)

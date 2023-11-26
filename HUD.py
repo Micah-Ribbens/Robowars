@@ -9,10 +9,7 @@ from velocity_calculator import VelocityCalculator
 import pygame
 pygame.init()
 
-# TODO add function for rendering fonts and shapes so not a lot of same logic
-# TODO explain positions relative to screen for x and y coordinates
 class HUD:
-    # TODO what are all the dimensions for?
     y_coordinate = VelocityCalculator.give_measurement(screen_height, 1)
     x_coordinate_1 = screen_length - VelocityCalculator.give_measurement(screen_length, 4)
     x_coordinate_2 = x_coordinate_1 + VelocityCalculator.give_measurement(screen_length, 2)

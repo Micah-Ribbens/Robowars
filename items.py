@@ -1,5 +1,4 @@
 import pygame
-import os
 from UtilityClasses import GameCharacters, GameObject, HistoryKeeper
 import math
 from velocity_calculator import VelocityCalculator
@@ -8,8 +7,6 @@ from important_variables import (
     screen_length,
     window
 )
-# from players import Player
-# TODO USE Trigonometry for drawing the item
 from abc import abstractmethod
 
 class Item(GameObject):
@@ -51,8 +48,10 @@ class Whip(Item):
     def reset(self):
         self.length = 0
         self.height = 0
+        self.x_coordinate = -10_000
         self.secs_extended = 0
         self.move_type = None
+        self.whip_is_extending = False
 
     def __init__(self, player=None):
         self.color = (77, 38, 0)
@@ -61,6 +60,7 @@ class Whip(Item):
     def use_item(self, move_type):
         if not self.whip_is_extending:
             self.whip_is_extending = True
+
         self.move_type = move_type
 
     def draw_whip_upwards(self, direction_is_right):
@@ -104,16 +104,18 @@ class Whip(Item):
             self.draw_whip_extending(direction_is_right)
         else:
             self.reset()
+
     def left_attack(self):
         self.regular_attack(False)
+
     def right_attack(self):
         self.regular_attack(True)
+
     def setup_slash_attack(self):
         self.height = self.base_height
         self.secs_extended += VelocityCalculator.time
         self.length = self.max_length
         self.x_coordinate = self.player.right_edge if self.player.is_facing_right else self.player.x_coordinate - self.length
-        
 
     def upwards_attack(self):
         velocity = VelocityCalculator.give_velocity(screen_length, 450)
@@ -162,7 +164,6 @@ class Sword(Item):
             return self.player.right_edge
         if self.get_degrees() > 90:
             return whip_end - math.sin(self.get_radians() - 90) * self.full_length
-        # print("X sin", math.sin(self.get_radians()), self.get_radians())
         return self.player.right_edge + math.sin(self.get_radians()) * self.full_length
 
     def get_y(self):
@@ -222,7 +223,6 @@ class Shield(Item):
         #     self.player.flinch()
             
     def stop_usage(self):
-        print("CALLED")
         self.is_being_used = False
 
         

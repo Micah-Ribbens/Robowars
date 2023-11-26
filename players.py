@@ -1,4 +1,4 @@
-from UtilityClasses import GameCharacters, Segment
+from UtilityClasses import GameCharacters, Segment, SideScrollableComponents
 from important_variables import (
     screen_height,
     screen_length,
@@ -13,11 +13,10 @@ from time import time
 import math
 from velocity_calculator import VelocityCalculator
 from UtilityClasses import HistoryKeeper
-# TODO create class to clean up attributes
 class Player(GameCharacters):
     item = None
     running_velocity = VelocityCalculator.give_velocity(screen_length, 600)
-    running_deceleration = -1200.
+    running_deceleration = 0
     is_decelerating = False
     is_facing_right = False
     can_move_down = True
@@ -38,11 +37,12 @@ class Player(GameCharacters):
     used_dodge = False
     apex_max_time = .1
     jump_time = 0
-    # TODO better name need it for calculations for jumping and gravity
     last_y_unmoving = 0
     last_platform_on = None
     time_affected_by_gravity = 0
     x_before_decelerating = 0
+    hit_shield_button_last_cycle = False
+    hit_a_attack_button_last_cycle = False
 
     def __init__(self):
         self.controlls = pygame.key.get_pressed()
@@ -112,13 +112,13 @@ class Player(GameCharacters):
 
         if self.is_flinching:
             return True
-    # TODO think of better name
+
     def deceleration_figure_outter(self, key):
         if not self.on_platform:
             return
         last_player = HistoryKeeper.get_last("player")
         if last_player is not None and last_player.controlls[key] and not self.controlls[key]:
-            self.is_decelerating = True
+            # self.is_decelerating = True
             self.x_before_decelerating = self.x_coordinate
 
     def rightwards_movement(self, right_key_is_held_down):
@@ -130,12 +130,11 @@ class Player(GameCharacters):
         self.is_facing_right = True
         location_to_sidescroll = VelocityCalculator.give_measurement(screen_length, 20)
         self.game_is_sidescrolling = self.x_coordinate >= location_to_sidescroll
-        # TODO change back just don't want sidescrolling for now
-        # if self.x_coordinate >= location_to_sidescroll:
-        #     SideScrollableComponents.side_scroll_all(VelocityCalculator.calc_distance(self.running_velocity))
+        if self.x_coordinate >= location_to_sidescroll:
+            SideScrollableComponents.side_scroll_all(VelocityCalculator.calc_distance(self.running_velocity))
 
-        # else:
-        self.x_coordinate += VelocityCalculator.calc_distance(self.running_velocity)
+        else:
+            self.x_coordinate += VelocityCalculator.calc_distance(self.running_velocity)
 
     def decelerate(self):
         self.time_affected_by_deceleration += VelocityCalculator.time
@@ -210,9 +209,10 @@ class Player(GameCharacters):
         self.deceleration_figure_outter(pygame.K_LEFT)
 
         # If using whip shield can't be used
-        if self.controlls[pygame.K_DOWN] and not self.item.whip_is_extending:
+        if self.controlls[pygame.K_DOWN] and not self.item.whip_is_extending and not self.hit_shield_button_last_cycle:
             self.shield.use_item()
-        
+        self.hit_shield_button_last_cycle = self.controlls[pygame.K_DOWN]
+
         if self.is_decelerating:
             self.decelerate()
         
@@ -223,12 +223,16 @@ class Player(GameCharacters):
                      self.controlls[pygame.K_d]: self.item.RIGHT_ATTACK,
                      self.controlls[pygame.K_a]: self.item.LEFT_ATTACK}
 
-            self.item.use_item(self.get_move(moves))
-        
+            move = self.get_move(moves)
+            if move != None and not self.hit_a_attack_button_last_cycle:
+                self.item.use_item(self.get_move(moves))
+            self.hit_a_attack_button_last_cycle = move != None
+
     def get_move(self, moves: dict):
         for key in moves.keys():
             if key:
                 return moves[key]
+
         # If None of the keys were hit
         return moves.get(None)
 

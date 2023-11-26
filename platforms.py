@@ -15,7 +15,7 @@ class Platform(GameObject):
         self.x_coordinate = 100
         self.height = 100
         self.y_coordinate = screen_height - self.height
-        self.length = VelocityCalculator.give_measurement(screen_length, 50)
+        self.length = VelocityCalculator.give_measurement(screen_length, 20)
     
     def draw(self):
         green_segment = Segment(

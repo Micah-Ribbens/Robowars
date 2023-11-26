@@ -5,7 +5,6 @@ from platforms import Platform
 from players import Player
 from enemies import SimpleEnemy
 from important_variables import screen_height
-# TODO explain why coordinates and lengths are choosen
 class TestPlayers(unittest.TestCase):
     def test_max_time_in_air(self):
         player = Player()

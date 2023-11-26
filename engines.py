@@ -14,7 +14,6 @@ class CollisionsFinder:
         is_platform_collision = CollisionsFinder.object_collision(player, platform)
         if player.bottom == platform.y_coordinate:
             return is_platform_collision
-        # print(HistoryKeeper.get_las("player"))
         if not is_player or len(HistoryKeeper.get("player")) <= 1:
             return is_platform_collision
         
@@ -128,11 +127,10 @@ class InteractionEngine:
         landing_collision = player_halfway_point < enemy_halfway_point
         knockback_is_left = is_sidescrolling_collision or is_leftside_movement_collision or landing_collision
         
-        # player.knockback(10, direction_is_left=knockback_is_left)
-        # TODO change this back
-        # if not player.is_invincible:
-        #     player.current_health -= 5
-        #     player.flinch()
+        player.knockback(enemy.knockback_distance, direction_is_left=knockback_is_left)
+        if not player.is_invincible:
+            player.current_health -= 5
+            player.flinch()
 
     def object_whip_interactions(object, object_hitting):
         if not object_hitting.item.whip_is_extending:
@@ -145,10 +143,12 @@ class InteractionEngine:
 
         if object.shield.is_being_used and InteractionEngine.shield_is_right_direction(object, object_hitting):
             object_hitting.flinch()
-            print("FLINCH")
             object_hitting.current_health -= object.shield.damage
             object.shield.caused_flinch = True
             return
+
+        # if object.is_invincible or object_hitting.hit_during_item_cycle:
+        #     print(object.is_invincible, object_hitting.hit_during_item_cycle)
 
         if not object.is_invincible and not object_hitting.hit_during_item_cycle:
             object.flinch()

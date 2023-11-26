@@ -11,14 +11,20 @@ from score_keeper import ScoreKeeper
 from UtilityClasses import HistoryKeeper
 from players import Player
 from important_variables import screen_length
+from velocity_calculator import VelocityCalculator
 
 
 class GameRenderer:
     def _render_enemy(enemy: SimpleEnemy):
         platform = enemy.platform_on
         if not CollisionsFinder.on_platform(platform, enemy, False):
+            if (enemy.time_affected_by_gravity == 0):
+                enemy.last_y_unmoving = enemy.y_coordinate
+
+            enemy.time_affected_by_gravity += VelocityCalculator.time
             PhysicsEngine.do_gravity(enemy)
         else:
+            enemy.time_affected_by_gravity = 0
             enemy.is_on_platform = CollisionsFinder.on_platform(platform, enemy, False)
             enemy.platform_on = platform
             enemy.movement()

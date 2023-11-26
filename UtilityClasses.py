@@ -54,7 +54,6 @@ class GameObject:
     def find_all_attributes(object):
         attributes = []
         for key in object.__dict__.keys():
-            print(key)
             if not key.__contains__("__") and not callable(key):
                 attributes.append(key)
         return attributes
@@ -120,8 +119,7 @@ class GameObject:
             HistoryKeeper.add(current_time + VelocityCalculator.time, name, False)
 
         return False
-# TODO better name for something that encompasses all things that have some
-# sort of movement and can be knocked back (probably just enemies and players)
+
 class GameCharacters(GameObject):
     current_health = 0
     hit_during_item_cycle = False
@@ -138,14 +136,15 @@ class GameCharacters(GameObject):
         self.height, self.current_health, self.full_health = height, current_health, full_health
         self.is_invincible, self.is_flinching, self.is_blocking = is_invincible, is_flinching, is_blocking
 
-    def knockback(self, damage=0, **kwargs):
+    def knockback(self, amount, damage=0, **kwargs):
         """One **kwargs should be direction_is_left"""
         UtilityFunctions.validate_kwargs_has_all_fields(["direction_is_left"], kwargs)
         if kwargs.get("direction_is_left"):
-            self.x_coordinate -= 200
+            self.x_coordinate -= amount
         else:
-            self.x_coordinate += 200
+            self.x_coordinate += amount
         self.current_health -= damage
+
     @abstractmethod
     def movement(self):
         pass

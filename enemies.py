@@ -12,7 +12,7 @@ from velocity_calculator import (
 )
 class SimpleEnemy(GameCharacters):
     velocity = VelocityCalculator.give_velocity(screen_length, 60)
-    knockback_distance = VelocityCalculator.give_measurement(screen_length, 25)
+    knockback_distance = VelocityCalculator.give_measurement(screen_length, 5)
     is_moving_left = True
     is_facing_right = False
     damage = 5
@@ -27,13 +27,15 @@ class SimpleEnemy(GameCharacters):
     eye_color = (255, 42, 42)
     shield = None
     have_to_wait_to_use_again = False
+    time_affected_by_gravity = 0
+    last_y_unmoving = 0
 
     def __init__(self, player=None):
         self.x_coordinate = 80
         self.length = VelocityCalculator.give_measurement(screen_length, 5)
         self.height = VelocityCalculator.give_measurement(screen_height, 15)
         self.y_coordinate = 80
-        self.full_health = 50
+        self.full_health = 20
         self.current_health = self.full_health
         self.color = self.black
         self.item = Whip(self)
@@ -50,8 +52,9 @@ class SimpleEnemy(GameCharacters):
             self.counter()
             return
 
-        # if self.time_based_activity_is_done("wait to use"+self.name, 2, self.shield.is_being_used, self.player_is_within_range()) and not self.shield.is_being_used:
-        #     self.item.use_item()
+        if self.time_based_activity_is_done("wait to use"+self.name, 2, self.shield.is_being_used, self.player_is_within_range()) and not self.shield.is_being_used:
+            move_type = Whip.LEFT_ATTACK if self.is_moving_left else Whip.RIGHT_ATTACK
+            self.item.use_item(move_type)
 
     def figure_out_blocking(self):
         # A rough amount; won't be exact since each iteration takes a different amount of time
@@ -65,7 +68,8 @@ class SimpleEnemy(GameCharacters):
     def counter(self):
         if self.time_based_activity_is_done("wait to hit after block"+self.name, .3, False):
             self.shield.caused_flinch = False
-            self.item.use_item()
+            move_type = Whip.LEFT_ATTACK if self.is_moving_left else Whip.RIGHT_ATTACK
+            self.item.use_item(move_type)
             self.shield.stop_usage()
         
     def movement(self):
@@ -86,7 +90,6 @@ class SimpleEnemy(GameCharacters):
 
         self.use_item_if_can()
 
-        
         self.change_direction_if_necessary()
 
         if CollisionsFinder.object_collision(self, self.player):

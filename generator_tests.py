@@ -1,6 +1,6 @@
 from items import Whip
 import unittest
-from engines import CollisionsFinder, InteractionsFinder
+from engines import CollisionsFinder, InteractionEngine
 from platforms import Platform
 from players import Player
 from enemies import SimpleEnemy
