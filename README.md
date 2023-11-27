@@ -1,10 +1,14 @@
-How to send code to Github:
-=============================================================================================================
-1. git switch -C enter_branch_name
-2. git commit -am "enter description for what you did" (Ex: "Changed player color" not " Changed player color ")
-3. git push -u origin branch_name_from_step_1
+Finished Development: 10/04/2021
+First Year of Programming
 
-How to get code from Github:
-=============================================================================================================
-1. Check to make sure that the code in Github reflects what you did. If yes:
-2. git pull https://github.com/Micah-Ribbens/Robowars
+# Summary
+This was my third iteration on an endless platformer. My first two I abandoned after only working on them for around
+6 hours. This was my first "large-scale" project. Part of this code made its way into my game engine that I build from
+scratch. My senior year of high school I would make another version of this code that worked a lot better. It had original
+pixel art! I started working on this project with my cousin, Solomon. He, however, quit pretty early in the project and
+had minimal contributions (less then 1% of code base).
+
+
+# Bug Fixes 11/27/2023
+- Fixed some deceleration and collision code (minor, but important changes)
+- Reinstated the endless platformer code (uncommented code and deleted quick test code)
