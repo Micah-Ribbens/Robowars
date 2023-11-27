@@ -13,10 +13,11 @@ from time import time
 import math
 from velocity_calculator import VelocityCalculator
 from UtilityClasses import HistoryKeeper
+
 class Player(GameCharacters):
     item = None
     running_velocity = VelocityCalculator.give_velocity(screen_length, 600)
-    running_deceleration = 0
+    running_deceleration = -1200
     is_decelerating = False
     is_facing_right = False
     can_move_down = True
@@ -117,8 +118,9 @@ class Player(GameCharacters):
         if not self.on_platform:
             return
         last_player = HistoryKeeper.get_last("player")
+
         if last_player is not None and last_player.controlls[key] and not self.controlls[key]:
-            # self.is_decelerating = True
+            self.is_decelerating = True
             self.x_before_decelerating = self.x_coordinate
 
     def rightwards_movement(self, right_key_is_held_down):
@@ -176,6 +178,10 @@ class Player(GameCharacters):
         if self.is_blocking:
             self.do_block()
 
+        if self.controlls[pygame.K_LEFT] or self.controlls[pygame.K_RIGHT]:
+            self.x_before_decelerating = self.x_coordinate
+            self.is_decelerating = False
+
         if self.can_dodge() and self.controlls[pygame.K_DOWN]:
             self.do_invincibility(.2)
             self.used_dodge = True
@@ -227,6 +233,9 @@ class Player(GameCharacters):
             if move != None and not self.hit_a_attack_button_last_cycle:
                 self.item.use_item(self.get_move(moves))
             self.hit_a_attack_button_last_cycle = move != None
+
+        if self.controlls[pygame.K_LEFT] or self.controlls[pygame.K_RIGHT]:
+            self.is_decelerating = False
 
     def get_move(self, moves: dict):
         for key in moves.keys():
