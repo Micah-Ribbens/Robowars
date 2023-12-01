@@ -28,3 +28,9 @@ but still was fun
 
 ### Bug Fixes, Scoring, etc.
 commit 2e4247bd8a15378d1a90126685ee65ea057b1381
+
+
+dc0284763dfa06263df935ce13ed19f69e15cefb - velocities and stuff
+cec31b55a922d987eb8933093e75643a1ad9098e - added textures (funny bug where you can stick to the top of the cieling by holding down the up button)
+d3e058e0e15c4e5698cc772faa43be67856e667d - Changed textures, fixed some bugs, overall more fun
+ea56332b7cf0f62543c949f8449789a6a9f79244 - Movement playground to test the slowing down and other code
