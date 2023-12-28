@@ -1,4 +1,4 @@
-from UtilityClasses import GameObject, Segment
+from base.utility_classes import GameObject, Segment
 from base.important_variables import (
     screen_height,
     screen_length,

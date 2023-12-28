@@ -1,8 +1,6 @@
-from random import random
 from base.engines import CollisionsFinder
-from items import Shield, Whip
-from UtilityClasses import GameCharacters, Segment
-from UtilityClasses import UtilityFunctions
+from game_components.items import Shield, Whip
+from base.utility_classes import GameCharacters, Segment, UtilityFunctions
 from base.important_variables import (
     screen_length,
     screen_height

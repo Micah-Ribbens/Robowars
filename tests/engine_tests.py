@@ -1,4 +1,3 @@
-from base.history_keeper import HistoryKeeper
 from game_components.items import Whip
 import unittest
 from base.engines import CollisionsFinder, InteractionEngine

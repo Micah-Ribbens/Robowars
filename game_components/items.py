@@ -1,5 +1,5 @@
 import pygame
-from UtilityClasses import GameCharacters, GameObject, HistoryKeeper
+from base.utility_classes import GameCharacters, GameObject, HistoryKeeper
 import math
 from base.velocity_calculator import VelocityCalculator
 from base.important_variables import (

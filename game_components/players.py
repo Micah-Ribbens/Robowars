@@ -1,18 +1,8 @@
-from UtilityClasses import GameCharacters, Segment, SideScrollableComponents
-from base.important_variables import (
-    screen_height,
-    screen_length,
-    window,
-    y_velocities
-    # consistency_keeper
-)
-from items import Shield, Whip, Sword
+from base.utility_classes import GameCharacters, Segment, SideScrollableComponents, HistoryKeeper
+from game_components.items import Shield, Whip, Sword
 from base.engines import *
 import pygame
-from time import time
-import math
 from base.velocity_calculator import VelocityCalculator
-from UtilityClasses import HistoryKeeper
 
 class Player(GameCharacters):
     item = None

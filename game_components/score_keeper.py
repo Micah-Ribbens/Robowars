@@ -1,7 +1,7 @@
-from HUD import HUD
-from players import Player
+from gui_components.hud import HUD
+from game_components.players import Player
 from base.velocity_calculator import VelocityCalculator
-from UtilityClasses import HistoryKeeper
+from base.utility_classes import HistoryKeeper
 
 
 class ScoreKeeper:

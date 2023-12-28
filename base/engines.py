@@ -1,13 +1,8 @@
-from UtilityClasses import GameObject, HistoryKeeper
-from game_components.items import Whip
+from base.utility_classes import GameObject, HistoryKeeper
 from base.important_variables import (
     screen_height,
     screen_length,
-    y_velocities
 )
-from base.velocity_calculator import VelocityCalculator
-from game_components.wall_of_death import WallOfDeath
-from game_components.platforms import Platform
 
 class CollisionsFinder:
     def on_platform(platform, player, is_player):

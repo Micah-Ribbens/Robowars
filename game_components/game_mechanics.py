@@ -1,33 +1,29 @@
-from UtilityClasses import GameObject, HistoryKeeper, SideScrollableComponents
-from enemies import SimpleEnemy
+from base.utility_classes import GameObject, HistoryKeeper, SideScrollableComponents
+from game_components.enemies import SimpleEnemy
 import time
 from base.velocity_calculator import VelocityCalculator
 import pygame
-from wall_of_death import WallOfDeath
+from game_components.wall_of_death import WallOfDeath
 from base.important_variables import (
     screen_length,
     background
 )
-from base.engines import InteractionEngine
-from items import (
-    Whip,
-)
 from base.engines import (
     PhysicsEngine,
 )
-from platforms import (
+from game_components.platforms import (
     Platform
 )
-from players import (
+from game_components.players import (
     Player
 )
 from base.important_variables import (
     window
 )
-from HUD import HUD
-from game_renderer import GameRenderer
-from generator import Generator
-from score_keeper import ScoreKeeper
+from gui_components.hud import HUD
+from game_components.game_renderer import GameRenderer
+from game_components.generator import Generator
+from game_components.score_keeper import ScoreKeeper
 
 nameOfGame = "Robowars"
 pygame.display.set_caption(f'{nameOfGame}')

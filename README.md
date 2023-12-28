@@ -10,6 +10,9 @@ scratch. My senior year of high school I would make another version of this code
 pixel art! I started working on this project with my cousin. He, however, quit pretty early in the project and
 had minimal contributions (less than 1% of code base).
 
+# Game Image
+
+
 # Monumental Commits
 ### Generation of enemies and platforms: 02/01/2021
 commit d0e5d53715a2e645761a2bc7cee73b76727c3995

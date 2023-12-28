@@ -2,10 +2,10 @@ from base.important_variables import (
     screen_length,
     screen_height,
 )
-from platforms import Platform
-from enemies import SimpleEnemy
+from game_components.platforms import Platform
+from game_components.enemies import SimpleEnemy
 import random
-from players import Player
+from game_components.players import Player
 
 
 def generate_platform_length():

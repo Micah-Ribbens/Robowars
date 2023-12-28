@@ -1,11 +1,10 @@
-from important_variables import window
-import pygame
 from abc import abstractmethod
-from velocity_calculator import VelocityCalculator
-from important_variables import screen_height, background, screen_length, window
+from base.velocity_calculator import VelocityCalculator
+from base.important_variables import screen_height, background, screen_length, window
 import random
-from utility_functions import *
+from base.utility_functions import *
 import pickle
+
 class Segment:
     is_percentage = False
     color = (0,0,0)

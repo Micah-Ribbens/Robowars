@@ -1,15 +1,14 @@
 import pygame
-from UtilityClasses import UtilityFunctions
-from enemies import SimpleEnemy
+from base.utility_classes import UtilityFunctions, HistoryKeeper
+from game_components.enemies import SimpleEnemy
 from base.engines import (
     PhysicsEngine,
     CollisionsFinder,
     InteractionEngine
 )
-from HUD import HUD
-from score_keeper import ScoreKeeper
-from UtilityClasses import HistoryKeeper
-from players import Player
+from gui_components.hud import HUD
+from game_components.score_keeper import ScoreKeeper
+from game_components.players import Player
 from base.important_variables import screen_length
 from base.velocity_calculator import VelocityCalculator
 

@@ -3,9 +3,9 @@ from base.important_variables import (
     window,
     screen_height,
     screen_length, 
-    # consistency_keeper
 )
 from base.velocity_calculator import VelocityCalculator
+
 class WallOfDeath:
     color = (0, 0, 250)
     x_coordinate = -screen_length

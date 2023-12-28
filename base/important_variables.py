@@ -1,5 +1,6 @@
 import pygame
-from velocity_calculator import VelocityCalculator
+from base.velocity_calculator import VelocityCalculator
+
 screen_length = 800
 screen_height = 500
 background = (0, 200, 250)

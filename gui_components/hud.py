@@ -1,4 +1,4 @@
-from UtilityClasses import UtilityFunctions
+from base.utility_classes import UtilityFunctions
 import cProfile
 from base.important_variables import (
     screen_length,

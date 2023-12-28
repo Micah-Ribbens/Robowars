@@ -1,9 +1,4 @@
-from game_components.items import Whip
 import unittest
-from base.engines import CollisionsFinder, InteractionEngine
-from game_components.platforms import Platform
-from game_components.players import Player
-from game_components.enemies import SimpleEnemy
 from game_components.generator import *
 import random
 
