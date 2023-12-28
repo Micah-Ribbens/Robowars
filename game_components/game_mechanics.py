@@ -133,5 +133,6 @@ class GameRunner:
             # Why is this needed?
             if time_taken > 0:
                 VelocityCalculator.time = time_taken
+
         GameRunner.reset_variables()
         GameRunner.run_game()
