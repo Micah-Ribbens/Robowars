@@ -1,11 +1,11 @@
 from UtilityClasses import UtilityFunctions
 import cProfile
-from important_variables import (
+from base.important_variables import (
     screen_length,
     screen_height,
     window
 )
-from velocity_calculator import VelocityCalculator
+from base.velocity_calculator import VelocityCalculator
 import pygame
 pygame.init()
 

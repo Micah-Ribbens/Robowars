@@ -1,10 +1,10 @@
-from items import Whip
+from game_components.items import Whip
 import unittest
-from engines import CollisionsFinder, InteractionEngine
-from platforms import Platform
-from players import Player
-from enemies import SimpleEnemy
-from generator import *
+from base.engines import CollisionsFinder, InteractionEngine
+from game_components.platforms import Platform
+from game_components.players import Player
+from game_components.enemies import SimpleEnemy
+from game_components.generator import *
 import random
 
 class TestEngines(unittest.TestCase):

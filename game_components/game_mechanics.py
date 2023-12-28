@@ -1,18 +1,18 @@
 from UtilityClasses import GameObject, HistoryKeeper, SideScrollableComponents
 from enemies import SimpleEnemy
 import time
-from velocity_calculator import VelocityCalculator
+from base.velocity_calculator import VelocityCalculator
 import pygame
 from wall_of_death import WallOfDeath
-from important_variables import (
+from base.important_variables import (
     screen_length,
     background
 )
-from engines import InteractionEngine
+from base.engines import InteractionEngine
 from items import (
     Whip,
 )
-from engines import (
+from base.engines import (
     PhysicsEngine,
 )
 from platforms import (
@@ -21,7 +21,7 @@ from platforms import (
 from players import (
     Player
 )
-from important_variables import (
+from base.important_variables import (
     window
 )
 from HUD import HUD

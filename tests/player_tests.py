@@ -1,10 +1,10 @@
-from items import Whip
+from game_components.items import Whip
 import unittest
-from engines import CollisionsFinder, InteractionsFinder, PhysicsEngine
-from platforms import Platform
-from players import Player
-from enemies import SimpleEnemy
-from important_variables import screen_height
+from base.engines import CollisionsFinder, InteractionsFinder, PhysicsEngine
+from game_components.platforms import Platform
+from game_components.players import Player
+from game_components.enemies import SimpleEnemy
+from base.important_variables import screen_height
 class TestPlayers(unittest.TestCase):
     def test_max_time_in_air(self):
         player = Player()

@@ -1,7 +1,7 @@
 import pygame
 from UtilityClasses import UtilityFunctions
 from enemies import SimpleEnemy
-from engines import (
+from base.engines import (
     PhysicsEngine,
     CollisionsFinder,
     InteractionEngine
@@ -10,8 +10,8 @@ from HUD import HUD
 from score_keeper import ScoreKeeper
 from UtilityClasses import HistoryKeeper
 from players import Player
-from important_variables import screen_length
-from velocity_calculator import VelocityCalculator
+from base.important_variables import screen_length
+from base.velocity_calculator import VelocityCalculator
 
 
 class GameRenderer:

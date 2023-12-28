@@ -1,21 +1,14 @@
 Finished Development: 10/04/2021
-First Year of Programming
 
-
-Important Note: Makes sure you run this using Python3.9 because for whatever reason it crashes in 3.12 if you are trying
+Important Note: Makes sure you run this using Python3.9 because it crashes in 3.12 if you are trying
 to run older versions of the game
 
 # Summary
 This was my third iteration on an endless platformer. My first two I abandoned after only working on them for around
 6 hours. This was my first "large-scale" project. Part of this code made its way into my game engine that I build from
 scratch. My senior year of high school I would make another version of this code that worked a lot better. It had original
-pixel art! I started working on this project with my cousin, Solomon. He, however, quit pretty early in the project and
-had minimal contributions (less then 1% of code base).
-
-
-# Bug Fixes 11/27/2023
-- Fixed some deceleration and collision code (minor, but important changes)
-- Reinstated the endless platformer code (uncommented code and deleted quick test code)
+pixel art! I started working on this project with my cousin. He, however, quit pretty early in the project and
+had minimal contributions (less than 1% of code base).
 
 # Monumental Commits
 ### Generation of enemies and platforms: 02/01/2021
@@ -35,8 +28,6 @@ average running time now. Then it would use the ratio to find what those values 
 run at different speeds and the more code I added, the slower the code would get. Thankfully, I eventually switched to 
 velocities and deltaTime
 
-
-
 ### Switched to Velocity and deltaTime: 07/26/2021
 commit dc0284763dfa06263df935ce13ed19f69e15cefb
 
@@ -53,7 +44,7 @@ game mechanics from this point forward stayed relatively the same.
 commit cec31b55a922d987eb8933093e75643a1ad9098e
 
 Changed the look of the game completely. It looks much better after this modification! There is also a funny bug where you
-can stick to the cieling infinitely by holding up while on the cieling (jump into cieling and keep the up arrow held in)
+can stick to the ceiling infinitely by holding up while on the ceiling (jump into ceiling and keep the up arrow held in)
 
 ### Changed the textures and made it more fun: 09/28/2021
 commit d3e058e0e15c4e5698cc772faa43be67856e667d
@@ -65,3 +56,8 @@ Changed textures, fixed some bugs, overall more fun
 commit ea56332b7cf0f62543c949f8449789a6a9f79244
 
 Movement playground to test the slowing down and other code
+
+# Bug Fixes 12/27/2023
+- Fixed some deceleration and collision code (minor, but important changes)
+- Reinstated the endless platformer code (uncommented code and deleted quick test code)
+- Made the file structure prettier

@@ -1,10 +1,10 @@
 from UtilityClasses import GameObject, Segment
-from important_variables import (
+from base.important_variables import (
     screen_height,
     screen_length,
     window
 )
-from velocity_calculator import VelocityCalculator
+from base.velocity_calculator import VelocityCalculator
 import pygame
 
 

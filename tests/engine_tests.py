@@ -1,10 +1,10 @@
-from history_keeper import HistoryKeeper
-from items import Whip
+from base.history_keeper import HistoryKeeper
+from game_components.items import Whip
 import unittest
-from engines import CollisionsFinder, InteractionEngine
-from platforms import Platform
-from players import Player
-from enemies import SimpleEnemy
+from base.engines import CollisionsFinder, InteractionEngine
+from game_components.platforms import Platform
+from game_components.players import Player
+from game_components.enemies import SimpleEnemy
 
 class TestEngines(unittest.TestCase):
     def get_test_players(self, number):

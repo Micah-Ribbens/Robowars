@@ -1,6 +1,6 @@
 from HUD import HUD
 from players import Player
-from velocity_calculator import VelocityCalculator
+from base.velocity_calculator import VelocityCalculator
 from UtilityClasses import HistoryKeeper
 
 

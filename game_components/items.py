@@ -1,8 +1,8 @@
 import pygame
 from UtilityClasses import GameCharacters, GameObject, HistoryKeeper
 import math
-from velocity_calculator import VelocityCalculator
-from important_variables import (
+from base.velocity_calculator import VelocityCalculator
+from base.important_variables import (
     screen_height,
     screen_length,
     window

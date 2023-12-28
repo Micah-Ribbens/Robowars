@@ -1,13 +1,13 @@
 from random import random
-from engines import CollisionsFinder
+from base.engines import CollisionsFinder
 from items import Shield, Whip
 from UtilityClasses import GameCharacters, Segment
 from UtilityClasses import UtilityFunctions
-from important_variables import (
+from base.important_variables import (
     screen_length,
     screen_height
 )
-from velocity_calculator import (
+from base.velocity_calculator import (
     VelocityCalculator  
 )
 class SimpleEnemy(GameCharacters):
